@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Harsh Sidhapara\\Downloads\\MediTrack-DotNet\\MediTrack\\wwwroot\\css\\style.css",
+      "PackagePath": "staticwebassets\\css\\style.css"
+    },
+    {
+      "Id": "C:\\Users\\Harsh Sidhapara\\Downloads\\MediTrack-DotNet\\MediTrack\\wwwroot\\js\\script.js",
+      "PackagePath": "staticwebassets\\js\\script.js"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.MediTrack.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.build.MediTrack.props",
+      "PackagePath": "build\\MediTrack.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.MediTrack.props",
+      "PackagePath": "buildMultiTargeting\\MediTrack.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.buildTransitive.MediTrack.props",
+      "PackagePath": "buildTransitive\\MediTrack.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
