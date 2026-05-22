@@ -1,5 +1,3 @@
-// MediTrack script.js — ASP.NET Core Edition
-// Firebase completely replaced with fetch() calls to .NET API controllers
 
 async function api(method, url, body) {
     try {
@@ -325,3 +323,244 @@ document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('cli
 const ua=document.querySelector('.file-upload-area');if(ua){ua.addEventListener('dragover',e=>{e.preventDefault();ua.classList.add('drag-over');});['dragleave','drop'].forEach(ev=>ua.addEventListener(ev,()=>ua.classList.remove('drag-over')));}
 document.querySelectorAll('.btn-submit,.btn-add-quick,.btn-login,.btn-modal-save,.btn-modal-danger').forEach(btn=>{btn.addEventListener('mousedown',()=>{btn.style.transform='scale(0.97)';});btn.addEventListener('mouseup',()=>{btn.style.transform='';});btn.addEventListener('mouseleave',()=>{btn.style.transform='';});});
 document.addEventListener('click',function(e){const card=e.target.closest('.stat-card');if(card){card.style.transform='scale(0.97)';setTimeout(()=>{card.style.transform='';},150);}});
+
+/* ================================================================
+   MEDITRACK — UI ENHANCEMENTS (append to existing script.js)
+   ================================================================ */
+
+/* ── ENHANCED TOAST ─────────────────────────────────────────── */
+const _originalShowToast = window.showToast;
+window.showToast = function(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    const icon = t.querySelector('svg');
+    const colors = {
+        success: '#10b981',
+        error:   '#ef4444',
+        warning: '#f59e0b',
+        info:    '#60a5fa'
+    };
+    if (icon) icon.style.color = colors[type] || colors.success;
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.remove('hide');
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => {
+        t.classList.add('hide');
+        setTimeout(() => t.classList.remove('show', 'hide'), 300);
+    }, 3200);
+};
+
+/* ── GRID / LIST VIEW TOGGLE ─────────────────────────────────── */
+(function injectViewToggle() {
+    const toolbar = document.querySelector('.inv-toolbar');
+    if (!toolbar) return;
+
+    const toggleWrap = document.createElement('div');
+    toggleWrap.style.cssText = 'display:flex;gap:4px;';
+    toggleWrap.innerHTML = `
+        <button id="view-grid-btn" title="Grid view" style="
+            width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);
+            background:var(--primary);color:#fff;display:flex;align-items:center;
+            justify-content:center;cursor:pointer;transition:all 0.18s;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+        </button>
+        <button id="view-list-btn" title="List view" style="
+            width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);
+            background:var(--surface);color:var(--text-secondary);display:flex;align-items:center;
+            justify-content:center;cursor:pointer;transition:all 0.18s;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+        </button>`;
+    toolbar.appendChild(toggleWrap);
+
+    let isListView = false;
+    const list = document.getElementById('inventory-list');
+
+    function applyView() {
+        const gridBtn = document.getElementById('view-grid-btn');
+        const listBtn = document.getElementById('view-list-btn');
+        if (isListView) {
+            list.style.cssText = 'display:flex;flex-direction:column;gap:0.6rem;';
+            list.querySelectorAll('.med-card').forEach(card => {
+                card.style.cssText = 'display:grid;grid-template-columns:120px 1fr auto;border-radius:12px;min-height:unset;';
+                const imgWrap = card.querySelector('.med-image-wrap');
+                if (imgWrap) imgWrap.style.cssText = 'width:120px;flex-shrink:0;';
+                const img = card.querySelector('.med-image');
+                if (img) img.style.height = '88px';
+                const details = card.querySelector('.med-details');
+                if (details) details.style.cssText = 'padding:0.8rem;display:flex;flex-direction:column;justify-content:center;gap:0.3rem;';
+                const actions = card.querySelector('.card-actions');
+                if (actions) actions.style.cssText = 'grid-template-columns:1fr 1fr;gap:0.4rem;align-self:center;padding:0.75rem;min-width:140px;';
+            });
+            gridBtn.style.background = 'var(--surface)';
+            gridBtn.style.color = 'var(--text-secondary)';
+            listBtn.style.background = 'var(--primary)';
+            listBtn.style.color = '#fff';
+        } else {
+            list.style.cssText = '';
+            list.querySelectorAll('.med-card').forEach(card => {
+                card.style.cssText = '';
+                const imgWrap = card.querySelector('.med-image-wrap');
+                if (imgWrap) imgWrap.style.cssText = '';
+                const img = card.querySelector('.med-image');
+                if (img) img.style.height = '';
+                const details = card.querySelector('.med-details');
+                if (details) details.style.cssText = '';
+                const actions = card.querySelector('.card-actions');
+                if (actions) actions.style.cssText = '';
+            });
+            gridBtn.style.background = 'var(--primary)';
+            gridBtn.style.color = '#fff';
+            listBtn.style.background = 'var(--surface)';
+            listBtn.style.color = 'var(--text-secondary)';
+        }
+    }
+
+    document.getElementById('view-grid-btn').addEventListener('click', () => { isListView = false; applyView(); });
+    document.getElementById('view-list-btn').addEventListener('click', () => { isListView = true; applyView(); });
+
+    // Re-apply after inventory renders
+    const observer = new MutationObserver(() => applyView());
+    if (list) observer.observe(list, { childList: true });
+})();
+
+/* ── STAGGERED CARD ENTRANCE ─────────────────────────────────── */
+function staggerCards() {
+    document.querySelectorAll('#inventory-list .med-card').forEach((card, i) => {
+        card.style.animationDelay = `${i * 0.04}s`;
+    });
+}
+const _origList = document.getElementById('inventory-list');
+if (_origList) {
+    new MutationObserver(staggerCards).observe(_origList, { childList: true });
+}
+
+/* ── ENHANCED CHART COLOURS ──────────────────────────────────── */
+window.CHART_COLORS = {
+    primary:   '#2563eb',
+    accent:    '#06b6d4',
+    success:   '#10b981',
+    warning:   '#f59e0b',
+    danger:    '#ef4444',
+    purple:    '#8b5cf6',
+    gridColor: 'rgba(226,232,240,0.7)',
+    textColor: '#94a3b8',
+};
+// Dark mode chart colours
+function updateChartTheme() {
+    const dark = document.body.classList.contains('dark-mode');
+    window.CHART_COLORS.gridColor = dark ? 'rgba(26,45,72,0.8)' : 'rgba(226,232,240,0.7)';
+    window.CHART_COLORS.textColor = dark ? '#475e78' : '#94a3b8';
+}
+document.getElementById('dark-toggle')?.addEventListener('click', () => {
+    updateChartTheme();
+});
+updateChartTheme();
+
+/* ── KEYBOARD SHORTCUTS ──────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+    // Ctrl/Cmd + K — focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const search = document.getElementById('search-bar');
+        if (search) { search.focus(); search.select(); }
+    }
+    // Escape — close any open modal
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => {
+            const closeBtn = m.querySelector('.modal-close, #edit-modal-close, #delete-modal-close, #invoice-modal-close');
+            if (closeBtn) closeBtn.click();
+        });
+    }
+});
+
+/* ── SEARCH SHORTCUT HINT ─────────────────────────────────────── */
+(function addSearchHint() {
+    const sw = document.querySelector('.search-wrapper');
+    if (!sw) return;
+    const hint = document.createElement('div');
+    hint.style.cssText = `
+        position:absolute;right:${document.getElementById('search-count') ? '70px' : '14px'};
+        font-size:11px;font-weight:600;color:var(--text-muted);
+        background:var(--surface-2);border:1px solid var(--border);
+        border-radius:5px;padding:1px 6px;pointer-events:none;
+        font-family:'DM Sans',sans-serif;`;
+    hint.textContent = '⌘K';
+    hint.id = 'search-hint';
+    sw.style.position = 'relative';
+    sw.appendChild(hint);
+    document.getElementById('search-bar')?.addEventListener('focus', () => {
+        if (hint) hint.style.opacity = '0';
+    });
+    document.getElementById('search-bar')?.addEventListener('blur', () => {
+        if (hint) hint.style.opacity = '1';
+    });
+})();
+
+/* ── MEDICINE CARD RIPPLE ON CLICK ───────────────────────────── */
+document.getElementById('inventory-list')?.addEventListener('click', e => {
+    const card = e.target.closest('.med-card');
+    if (!card || e.target.closest('button')) return;
+    const r = document.createElement('span');
+    const rect = card.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.5;
+    r.style.cssText = `
+        position:absolute;border-radius:50%;pointer-events:none;
+        background:rgba(37,99,235,0.06);
+        width:${size}px;height:${size}px;
+        left:${e.clientX - rect.left - size/2}px;
+        top:${e.clientY - rect.top - size/2}px;
+        animation:cardRipple 0.6s ease forwards;`;
+    card.style.position = 'relative';
+    card.style.overflow = 'hidden';
+    card.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+});
+// inject cardRipple keyframe
+const ks = document.createElement('style');
+ks.textContent = '@keyframes cardRipple{from{opacity:1;transform:scale(0)}to{opacity:0;transform:scale(1)}}';
+document.head.appendChild(ks);
+
+/* ── AUTO-RESIZE TEXTAREA IN MODALS ──────────────────────────── */
+document.querySelectorAll('textarea.form-control').forEach(ta => {
+    ta.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+});
+
+/* ── DYNAMIC PAGE TITLE ──────────────────────────────────────── */
+const _navItems = document.querySelectorAll('.nav-item');
+_navItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const label = item.querySelector('span')?.textContent || 'Dashboard';
+        document.title = `${label} — MediTrack`;
+    });
+});
+
+/* ── PROFILE AVATAR INITIAL LIVE PREVIEW ────────────────────── */
+const profileNameInput = document.getElementById('profile-name');
+const profileSetupIcon = document.querySelector('.profile-setup-icon');
+if (profileNameInput && profileSetupIcon) {
+    profileNameInput.addEventListener('input', () => {
+        const val = profileNameInput.value.trim();
+        if (val) {
+            profileSetupIcon.textContent = val.charAt(0).toUpperCase();
+            profileSetupIcon.style.fontSize = '1.5rem';
+            profileSetupIcon.style.fontFamily = "'Syne', sans-serif";
+            profileSetupIcon.style.fontWeight = '800';
+            profileSetupIcon.style.color = '#fff';
+        } else {
+            profileSetupIcon.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+        }
+    });
+}
+
+console.log('%cMediTrack UI Enhanced ✓', 'color:#2563eb;font-weight:bold;font-size:14px;');

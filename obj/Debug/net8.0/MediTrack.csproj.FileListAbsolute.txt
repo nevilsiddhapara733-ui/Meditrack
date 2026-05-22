@@ -115,3 +115,9 @@ C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\M
 C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
 C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\Npgsql.dll
 C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\publish\web.config
+C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\publish\appsettings.json
+C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\publish\MediTrack.deps.json
+C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\publish\MediTrack.runtimeconfig.json
+C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\bin\Debug\net8.0\publish\skills-lock.json
+C:\Users\Harsh Sidhapara\Downloads\MediTrack-DotNet\MediTrack\obj\Debug\net8.0\MediTrack.sourcelink.json
