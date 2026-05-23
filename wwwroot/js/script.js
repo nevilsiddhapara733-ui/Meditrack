@@ -1,3 +1,5 @@
+// MediTrack script.js — ASP.NET Core Edition
+// Firebase completely replaced with fetch() calls to .NET API controllers
 
 async function api(method, url, body) {
     try {
@@ -564,3 +566,313 @@ if (profileNameInput && profileSetupIcon) {
 }
 
 console.log('%cMediTrack UI Enhanced ✓', 'color:#2563eb;font-weight:bold;font-size:14px;');
+
+/* ================================================================
+   MEDITRACK — PREMIUM ANIMATION ENGINE
+   ================================================================ */
+
+/* ── 1. STAT COUNTER ANIMATION ───────────────────────────────── */
+function animateCounter(el, target, duration = 1200) {
+    if (!el || isNaN(target)) return;
+    const start = performance.now();
+    const startVal = 0;
+    function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease out cubic
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(startVal + (target - startVal) * ease);
+        el.textContent = current;
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target;
+    }
+    requestAnimationFrame(update);
+}
+
+// Observe stat value changes and animate them
+(function watchStats() {
+    const statIds = ['total-count','expiring-count','low-stock-count','expiring60-count','expiring90-count'];
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(m => {
+            const el = m.target;
+            const val = parseInt(el.textContent);
+            if (!isNaN(val) && val > 0) {
+                el.textContent = '0';
+                animateCounter(el, val, 1000);
+            }
+        });
+    });
+    statIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el, { childList: true, characterData: true, subtree: true });
+    });
+})();
+
+/* ── 2. 3D CARD TILT EFFECT ──────────────────────────────────── */
+(function tiltCards() {
+    function applyTilt(card) {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const cx = rect.width / 2;
+            const cy = rect.height / 2;
+            const rotateX = ((y - cy) / cy) * -6;
+            const rotateY = ((x - cx) / cx) * 6;
+            card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px) scale(1.01)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+            card.style.transition = 'transform 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s';
+        });
+        card.addEventListener('mouseenter', () => {
+            card.style.transition = 'transform 0.1s ease, box-shadow 0.22s';
+        });
+    }
+
+    // Apply to stat cards
+    document.querySelectorAll('.stat-card').forEach(applyTilt);
+
+    // Apply to med cards as they are added
+    const listEl = document.getElementById('inventory-list');
+    if (listEl) {
+        new MutationObserver(() => {
+            listEl.querySelectorAll('.med-card:not([data-tilt])').forEach(card => {
+                card.setAttribute('data-tilt', '1');
+                applyTilt(card);
+            });
+        }).observe(listEl, { childList: true });
+    }
+})();
+
+/* ── 3. TYPEWRITER EFFECT ON LOGIN HERO ─────────────────────── */
+(function typewriter() {
+    const el = document.querySelector('.hero-text h2');
+    if (!el) return;
+    const text = el.textContent.trim();
+    el.textContent = '';
+    el.style.visibility = 'visible';
+    let i = 0;
+    function type() {
+        if (i < text.length) {
+            el.textContent += text[i++];
+            setTimeout(type, i === 1 ? 400 : 38 + Math.random() * 20);
+        }
+    }
+    setTimeout(type, 700);
+})();
+
+/* ── 4. SCROLL FADE-IN OBSERVER ──────────────────────────────── */
+(function scrollReveal() {
+    const targets = '.overview-panel, .chart-card, .info-card, .profile-info-card, .ai-search-card, .ai-result-card';
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => entry.target.classList.add('visible'), i * 60);
+                io.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12 });
+    function observe() {
+        document.querySelectorAll(targets).forEach(el => {
+            if (!el.classList.contains('fade-in-up')) {
+                el.classList.add('fade-in-up');
+                io.observe(el);
+            }
+        });
+    }
+    observe();
+    // Re-observe when pages switch
+    document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => setTimeout(observe, 100)));
+})();
+
+/* ── 5. CONFETTI ON ADD MEDICINE ─────────────────────────────── */
+function launchConfetti() {
+    const colors = ['#2563eb','#06b6d4','#10b981','#f59e0b','#8b5cf6','#ef4444'];
+    for (let i = 0; i < 48; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.cssText = `
+            left: ${20 + Math.random() * 60}%;
+            top: ${Math.random() * 30}%;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            animation-duration: ${0.8 + Math.random() * 0.8}s;
+            animation-delay: ${Math.random() * 0.4}s;
+            transform: rotate(${Math.random() * 360}deg);
+            border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+            width: ${6 + Math.random() * 6}px;
+            height: ${6 + Math.random() * 6}px;
+        `;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2000);
+    }
+}
+
+// Hook into add medicine form submit
+const _addForm = document.getElementById('add-med-form');
+if (_addForm) {
+    _addForm.addEventListener('submit', () => {
+        setTimeout(launchConfetti, 300);
+    });
+}
+
+/* ── 6. SKELETON LOADERS ─────────────────────────────────────── */
+function showSkeletons(count = 6) {
+    const list = document.getElementById('inventory-list');
+    if (!list) return;
+    list.innerHTML = Array(count).fill('').map(() => `
+        <div class="skeleton-card">
+            <div class="skeleton-img"></div>
+            <div style="padding:4px 0">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line shorter"></div>
+            </div>
+        </div>`).join('');
+}
+
+// Show skeletons while medicines load
+const _origLoad = window.loadMedicines;
+if (typeof _origLoad === 'function') {
+    window.loadMedicines = async function() {
+        showSkeletons(6);
+        return _origLoad.apply(this, arguments);
+    };
+}
+
+/* ── 7. NAV ITEM RIPPLE ──────────────────────────────────────── */
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        const r = document.createElement('span');
+        r.className = 'ripple';
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
+        this.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+    });
+});
+
+/* ── 8. PAGE TRANSITION ──────────────────────────────────────── */
+const _origNavigateNow = document.querySelectorAll('.nav-item');
+_origNavigateNow.forEach(item => {
+    item.addEventListener('click', () => {
+        const active = document.querySelector('.page-section.active-page');
+        if (active) {
+            active.style.animation = 'pageOut 0.15s ease forwards';
+            setTimeout(() => { active.style.animation = ''; }, 200);
+        }
+    });
+});
+// Inject pageOut keyframe
+const ptStyle = document.createElement('style');
+ptStyle.textContent = '@keyframes pageOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-8px)}}';
+document.head.appendChild(ptStyle);
+
+/* ── 9. SMOOTH CHART DEFAULTS ────────────────────────────────── */
+if (window.Chart) {
+    Chart.defaults.animation = { duration: 900, easing: 'easeOutQuart' };
+    Chart.defaults.plugins.tooltip = {
+        ...Chart.defaults.plugins.tooltip,
+        backgroundColor: 'rgba(15,23,42,0.92)',
+        titleColor: '#e2eaf5',
+        bodyColor: '#7c93b0',
+        borderColor: 'rgba(255,255,255,0.08)',
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 10,
+        titleFont: { family: "'Syne', sans-serif", weight: '700', size: 13 },
+        bodyFont: { family: "'DM Sans', sans-serif", size: 12 },
+    };
+}
+
+/* ── 10. FLOATING ACTION BUTTON (FAB) ────────────────────────── */
+(function injectFAB() {
+    const fab = document.createElement('button');
+    fab.id = 'fab-add';
+    fab.title = 'Add Medicine (Ctrl+N)';
+    fab.innerHTML = `
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span class="fab-label">Add Medicine</span>`;
+    fab.style.cssText = `
+        position: fixed; bottom: 28px; right: 28px;
+        display: flex; align-items: center; gap: 8px;
+        padding: 0 20px 0 16px; height: 52px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: #fff; border: none; border-radius: 26px;
+        font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+        cursor: pointer; z-index: 90;
+        box-shadow: 0 6px 24px rgba(37,99,235,0.45), 0 2px 8px rgba(37,99,235,0.3);
+        transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        animation: fabIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 1s both;`;
+
+    const fabStyle = document.createElement('style');
+    fabStyle.textContent = `
+        @keyframes fabIn { from{opacity:0;transform:scale(0) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        #fab-add:hover { transform: scale(1.06) translateY(-2px); box-shadow: 0 10px 32px rgba(37,99,235,0.55); }
+        #fab-add:active { transform: scale(0.96); }
+        .fab-label { letter-spacing: -0.01em; }
+        #fab-add.fab-hidden { opacity: 0; transform: scale(0.7) translateY(20px); pointer-events: none; }
+        body.dark-mode #fab-add { box-shadow: 0 6px 24px rgba(96,165,250,0.4); }
+    `;
+    document.head.appendChild(fabStyle);
+    document.body.appendChild(fab);
+
+    // Click goes to Add Medicine page
+    fab.addEventListener('click', () => {
+        const addNav = document.querySelector('[data-target="page-add"]');
+        if (addNav) addNav.click();
+    });
+
+    // Keyboard shortcut Ctrl+N
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            const addNav = document.querySelector('[data-target="page-add"]');
+            if (addNav) addNav.click();
+        }
+    });
+
+    // Hide FAB on Add Medicine page
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const target = item.getAttribute('data-target');
+            if (target === 'page-add') fab.classList.add('fab-hidden');
+            else fab.classList.remove('fab-hidden');
+        });
+    });
+})();
+
+/* ── 11. DARK MODE — SMOOTH TRANSITION ──────────────────────── */
+const _dmStyle = document.createElement('style');
+_dmStyle.textContent = `
+    body, body * {
+        transition:
+            background-color 0.3s ease,
+            border-color 0.3s ease,
+            color 0.2s ease,
+            box-shadow 0.3s ease !important;
+    }
+`;
+document.getElementById('dark-toggle')?.addEventListener('click', () => {
+    document.head.appendChild(_dmStyle);
+    setTimeout(() => _dmStyle.remove(), 400);
+});
+
+/* ── 12. HEADER DATE — LIVE CLOCK ────────────────────────────── */
+(function liveClock() {
+    const el = document.getElementById('header-date');
+    if (!el) return;
+    function tick() {
+        const now = new Date();
+        el.textContent = now.toLocaleDateString('en-US', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        }) + ' · ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+    tick();
+    setInterval(tick, 30000);
+})();
+
+console.log('%c✦ MediTrack Premium Animations Active', 'color:#2563eb;font-weight:bold;font-size:13px;background:#eff6ff;padding:4px 8px;border-radius:6px;');
