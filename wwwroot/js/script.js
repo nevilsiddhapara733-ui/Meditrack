@@ -608,43 +608,6 @@ function animateCounter(el, target, duration = 1200) {
     });
 })();
 
-/* ── 2. 3D CARD TILT EFFECT ──────────────────────────────────── */
-(function tiltCards() {
-    function applyTilt(card) {
-        card.addEventListener('mousemove', e => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const cx = rect.width / 2;
-            const cy = rect.height / 2;
-            const rotateX = ((y - cy) / cy) * -6;
-            const rotateY = ((x - cx) / cx) * 6;
-            card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px) scale(1.01)`;
-        });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = '';
-            card.style.transition = 'transform 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s';
-        });
-        card.addEventListener('mouseenter', () => {
-            card.style.transition = 'transform 0.1s ease, box-shadow 0.22s';
-        });
-    }
-
-    // Apply to stat cards
-    document.querySelectorAll('.stat-card').forEach(applyTilt);
-
-    // Apply to med cards as they are added
-    const listEl = document.getElementById('inventory-list');
-    if (listEl) {
-        new MutationObserver(() => {
-            listEl.querySelectorAll('.med-card:not([data-tilt])').forEach(card => {
-                card.setAttribute('data-tilt', '1');
-                applyTilt(card);
-            });
-        }).observe(listEl, { childList: true });
-    }
-})();
-
 /* ── 3. TYPEWRITER EFFECT ON LOGIN HERO ─────────────────────── */
 (function typewriter() {
     const el = document.querySelector('.hero-text h2');
@@ -689,7 +652,7 @@ function animateCounter(el, target, duration = 1200) {
 /* ── 5. CONFETTI ON ADD MEDICINE ─────────────────────────────── */
 function launchConfetti() {
     const colors = ['#2563eb','#06b6d4','#10b981','#f59e0b','#8b5cf6','#ef4444'];
-    for (let i = 0; i < 48; i++) {
+    for (let i = 0; i < 22; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
         piece.style.cssText = `
@@ -844,22 +807,6 @@ if (window.Chart) {
         });
     });
 })();
-
-/* ── 11. DARK MODE — SMOOTH TRANSITION ──────────────────────── */
-const _dmStyle = document.createElement('style');
-_dmStyle.textContent = `
-    body, body * {
-        transition:
-            background-color 0.3s ease,
-            border-color 0.3s ease,
-            color 0.2s ease,
-            box-shadow 0.3s ease !important;
-    }
-`;
-document.getElementById('dark-toggle')?.addEventListener('click', () => {
-    document.head.appendChild(_dmStyle);
-    setTimeout(() => _dmStyle.remove(), 400);
-});
 
 /* ── 12. HEADER DATE — LIVE CLOCK ────────────────────────────── */
 (function liveClock() {
