@@ -376,3 +376,327 @@ document.addEventListener('keydown', e => {
         });
     }
 });
+
+
+/* ================================================================
+   ONLINE IMAGE SEARCH — NO API KEY, NO SIGNUP NEEDED
+   Uses Unsplash Source (free, direct URLs, no login required)
+   ================================================================ */
+
+(function injectImageSearch() {
+
+    const MEDICINE_QUERIES = [
+        'tablet','capsule','syrup','injection','pill','bottle',
+        'medicine','pharmaceutical','drug','strip','ointment','drops'
+    ];
+
+    /* ── Wait for upload area ── */
+    function waitFor(sel, cb) {
+        const el = document.querySelector(sel);
+        if (el) { cb(el); return; }
+        setTimeout(() => waitFor(sel, cb), 400);
+    }
+
+    waitFor('.file-upload-area', (uploadArea) => {
+
+        /* ── OR DIVIDER ── */
+        const orDiv = document.createElement('div');
+        orDiv.style.cssText = `display:flex;align-items:center;gap:10px;
+            margin:10px 0 0;color:var(--text-muted);font-size:12px;`;
+        orDiv.innerHTML = `
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+            <span>or</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>`;
+
+        /* ── SEARCH ONLINE BUTTON ── */
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            Search Image Online`;
+        btn.style.cssText = `
+            display:flex;align-items:center;justify-content:center;gap:7px;
+            width:100%;margin-top:8px;padding:9px 14px;
+            background:transparent;border:1.5px dashed var(--primary);
+            border-radius:10px;color:var(--primary);
+            font-size:13.5px;font-weight:600;
+            font-family:'DM Sans',sans-serif;cursor:pointer;`;
+        btn.onmouseenter = () => btn.style.background = 'var(--primary-glow)';
+        btn.onmouseleave = () => btn.style.background = 'transparent';
+        btn.onclick = () => openModal();
+
+        uploadArea.parentNode.insertBefore(orDiv, uploadArea.nextSibling);
+        uploadArea.parentNode.insertBefore(btn, orDiv.nextSibling);
+    });
+
+    /* ── BUILD MODAL ── */
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position:fixed;inset:0;z-index:2000;
+        background:rgba(8,12,24,0.72);
+        display:flex;align-items:center;justify-content:center;
+        padding:1.5rem;opacity:0;pointer-events:none;
+        transition:opacity 0.2s ease;`;
+
+    overlay.innerHTML = `
+      <div id="isc" style="
+          background:var(--surface);border-radius:18px;
+          box-shadow:0 24px 64px rgba(0,0,0,0.25);
+          width:100%;max-width:700px;max-height:88vh;
+          display:flex;flex-direction:column;
+          border:1px solid var(--border);overflow:hidden;
+          transform:scale(0.93) translateY(18px);
+          transition:transform 0.28s cubic-bezier(0.34,1.4,0.64,1);">
+
+        <!-- Header -->
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);
+                    display:flex;align-items:center;gap:12px;flex-shrink:0;">
+          <div style="width:38px;height:38px;border-radius:10px;
+                      background:var(--primary-glow);color:var(--primary);
+                      display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:700;color:var(--text)">
+                Search Medicine Image</div>
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:1px">
+                Free images — no login required</div>
+          </div>
+          <button id="isc-close" style="
+              width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+              background:var(--surface-2);color:var(--text-muted);
+              cursor:pointer;font-size:16px;display:flex;
+              align-items:center;justify-content:center;">✕</button>
+        </div>
+
+        <!-- Search -->
+        <div style="padding:14px 20px 10px;border-bottom:1px solid var(--border);flex-shrink:0;">
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <div style="flex:1;position:relative;">
+              <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);
+                          color:var(--text-muted);pointer-events:none;"
+                   width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input id="isc-input" type="text"
+                     placeholder="e.g. paracetamol, amoxicillin, cough syrup…"
+                     style="width:100%;padding:9px 12px 9px 34px;
+                            border:1.5px solid var(--border);border-radius:9px;
+                            font-size:13.5px;font-family:'DM Sans',sans-serif;
+                            color:var(--text);background:var(--surface-2);outline:none;"
+                     onfocus="this.style.borderColor='var(--primary)'"
+                     onblur="this.style.borderColor='var(--border)'"/>
+            </div>
+            <button id="isc-btn" style="
+                padding:9px 20px;background:var(--primary);color:#fff;
+                border:none;border-radius:9px;font-size:13.5px;font-weight:600;
+                font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;">
+                Search
+            </button>
+          </div>
+          <!-- Quick pills -->
+          <div style="display:flex;gap:5px;flex-wrap:wrap;" id="isc-pills">
+            ${MEDICINE_QUERIES.map(q => `
+              <span onclick="iscQuick('${q}')" style="
+                  padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;
+                  background:var(--surface-2);border:1px solid var(--border);
+                  color:var(--text-secondary);cursor:pointer;"
+                onmouseenter="this.style.background='var(--primary-glow)';this.style.color='var(--primary)';this.style.borderColor='var(--primary)'"
+                onmouseleave="this.style.background='var(--surface-2)';this.style.color='var(--text-secondary)';this.style.borderColor='var(--border)'"
+              >${q}</span>`).join('')}
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <div id="isc-grid" style="
+            flex:1;overflow-y:auto;padding:14px 20px 16px;
+            display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+            align-content:start;min-height:220px;">
+          <div style="grid-column:1/-1;text-align:center;padding:3.5rem 1rem;color:var(--text-muted);">
+            <div style="font-size:32px;margin-bottom:10px;">🔍</div>
+            <div style="font-size:13.5px;">Type a medicine name and click Search</div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="padding:9px 20px;border-top:1px solid var(--border);
+                    font-size:11px;color:var(--text-muted);flex-shrink:0;
+                    display:flex;justify-content:space-between;align-items:center;">
+          <span>Powered by <strong>Unsplash</strong> — royalty free</span>
+          <span id="isc-count" style="font-weight:600;color:var(--primary);"></span>
+        </div>
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    /* ── OPEN / CLOSE ── */
+    function openModal() {
+        const nameEl = document.getElementById('med-name');
+        if (nameEl && nameEl.value.trim())
+            document.getElementById('isc-input').value = nameEl.value.trim();
+        overlay.style.opacity = '1';
+        overlay.style.pointerEvents = 'auto';
+        document.getElementById('isc').style.transform = 'scale(1) translateY(0)';
+        document.getElementById('isc-input').focus();
+        if (document.getElementById('isc-input').value.trim()) doSearch();
+    }
+    function closeModal() {
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+        document.getElementById('isc').style.transform = 'scale(0.93) translateY(18px)';
+    }
+    document.getElementById('isc-close').onclick = closeModal;
+    overlay.onclick = e => { if (e.target === overlay) closeModal(); };
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && overlay.style.opacity === '1') closeModal();
+        if (e.key === 'Enter'  && overlay.style.opacity === '1') doSearch();
+    });
+
+    /* ── QUICK PILL ── */
+    window.iscQuick = function(term) {
+        document.getElementById('isc-input').value = term;
+        doSearch();
+    };
+    document.getElementById('isc-btn').onclick = doSearch;
+
+    /* ── SEARCH — uses Unsplash Source (no key needed) ── */
+    function doSearch() {
+        const raw = document.getElementById('isc-input').value.trim();
+        if (!raw) return;
+
+        const grid  = document.getElementById('isc-grid');
+        const count = document.getElementById('isc-count');
+
+        // Show loading
+        grid.innerHTML = `
+            <div style="grid-column:1/-1;display:flex;flex-direction:column;
+                        align-items:center;justify-content:center;
+                        padding:3rem;gap:12px;color:var(--text-muted);">
+                <div style="width:30px;height:30px;border:3px solid var(--border);
+                            border-top-color:var(--primary);border-radius:50%;
+                            animation:spin 0.7s linear infinite;"></div>
+                <div style="font-size:13px;">Finding images…</div>
+            </div>`;
+        count.textContent = '';
+
+        // Generate 15 unique Unsplash Source URLs with different seeds
+        const keywords = encodeURIComponent(raw + ',medicine,pharmaceutical,health');
+        const images = Array.from({length: 15}, (_, i) => ({
+            url: `https://source.unsplash.com/400x300/?${keywords}&sig=${Date.now() + i * 137}`,
+            thumb: `https://source.unsplash.com/200x150/?${keywords}&sig=${Date.now() + i * 137}`
+        }));
+
+        grid.innerHTML = '';
+        count.textContent = '15 images';
+
+        images.forEach((img, i) => {
+            const card = document.createElement('div');
+            card.style.cssText = `
+                border-radius:10px;overflow:hidden;cursor:pointer;
+                border:2px solid transparent;aspect-ratio:4/3;
+                background:var(--surface-2);position:relative;
+                transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s;`;
+            card.onmouseenter = () => {
+                card.style.borderColor = 'var(--primary)';
+                card.style.transform = 'translateY(-2px)';
+                card.style.boxShadow = '0 8px 20px rgba(15,111,255,0.15)';
+            };
+            card.onmouseleave = () => {
+                card.style.borderColor = 'transparent';
+                card.style.transform = '';
+                card.style.boxShadow = '';
+            };
+            card.onclick = () => selectImage(img.url, card);
+
+            const imgEl = document.createElement('img');
+            imgEl.src = img.thumb;
+            imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+            imgEl.onerror = () => {
+                card.style.display = 'none'; // hide broken ones
+            };
+
+            const overlay2 = document.createElement('div');
+            overlay2.style.cssText = `
+                position:absolute;inset:0;
+                display:flex;align-items:center;justify-content:center;
+                background:rgba(15,111,255,0);transition:background 0.15s;`;
+            overlay2.innerHTML = `
+                <div style="background:var(--primary);color:#fff;border-radius:20px;
+                            padding:5px 12px;font-size:12px;font-weight:600;
+                            opacity:0;transition:opacity 0.15s;">Use this</div>`;
+            card.onmouseenter = () => {
+                card.style.borderColor = 'var(--primary)';
+                card.style.transform = 'translateY(-2px)';
+                card.style.boxShadow = '0 8px 20px rgba(15,111,255,0.15)';
+                overlay2.style.background = 'rgba(15,111,255,0.15)';
+                overlay2.querySelector('div').style.opacity = '1';
+            };
+            card.onmouseleave = () => {
+                card.style.borderColor = 'transparent';
+                card.style.transform = '';
+                card.style.boxShadow = '';
+                overlay2.style.background = 'rgba(15,111,255,0)';
+                overlay2.querySelector('div').style.opacity = '0';
+            };
+
+            card.appendChild(imgEl);
+            card.appendChild(overlay2);
+            grid.appendChild(card);
+        });
+    }
+
+    /* ── SELECT IMAGE ── */
+    function selectImage(url, card) {
+        // Visual feedback
+        card.style.borderColor = 'var(--success)';
+        card.style.boxShadow   = '0 0 0 3px rgba(16,185,129,0.25)';
+
+        // Update form preview
+        const preview     = document.getElementById('image-preview');
+        const uploadText  = document.getElementById('file-upload-content');
+        if (preview)    { preview.src = url; preview.classList.remove('hidden'); }
+        if (uploadText) { uploadText.classList.add('hidden'); }
+
+        // Store URL
+        let hidden = document.getElementById('med-online-img');
+        if (!hidden) {
+            hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.id   = 'med-online-img';
+            hidden.name = 'onlineImageUrl';
+            document.getElementById('add-med-form')?.appendChild(hidden);
+        }
+        hidden.value = url;
+
+        setTimeout(() => { closeModal(); showToast('Image selected ✓'); }, 280);
+    }
+
+    /* ── PATCH FETCH to include online image URL ── */
+    const _fetch = window.fetch;
+    window.fetch = function(url, opts) {
+        if (typeof url === 'string' && url.includes('/api/medicines') && opts?.body) {
+            try {
+                const b = JSON.parse(opts.body);
+                const h = document.getElementById('med-online-img');
+                if (b && !b.image && h && h.value) {
+                    b.image = h.value;
+                    opts = { ...opts, body: JSON.stringify(b) };
+                    setTimeout(() => { h.value = ''; }, 300);
+                }
+            } catch(e) {}
+        }
+        return _fetch.call(this, url, opts);
+    };
+
+})();

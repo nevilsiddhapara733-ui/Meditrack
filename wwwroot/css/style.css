@@ -2456,3 +2456,19 @@ body.dark-mode .ai-search-card { border-top-color: #4d94ff; }
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ── ONLINE IMAGE SEARCH MODAL ───────────────────────────── */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+#img-search-modal * {
+    box-sizing: border-box;
+}
+#img-results::-webkit-scrollbar { width: 4px; }
+#img-results::-webkit-scrollbar-thumb {
+    background: var(--border); border-radius: 4px;
+}
