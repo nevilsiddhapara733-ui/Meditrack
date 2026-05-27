@@ -381,24 +381,22 @@ document.addEventListener('keydown', e => {
 
 
 
+
 /* ================================================================
    MEDICINE PACKET IMAGE SEARCH
-   Source 1: Open Drug Facts  — real medicine box/packet photos
-   Source 2: RxImage by NIH   — FDA medicine package photos
-   Source 3: Wikimedia        — pharmaceutical fallback
+   Calls /api/imagesearch (server-side proxy — no CORS issues)
    ================================================================ */
 
 (function injectImageSearch() {
 
-    /* Fallback packet images always available */
     const FALLBACKS = [
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Amoxicillin_Capsules.jpg/320px-Amoxicillin_Capsules.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Paracetamol500.jpg/320px-Paracetamol500.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Ibuprofen_400mg.jpg/320px-Ibuprofen_400mg.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Aspirin_Canada.jpg/320px-Aspirin_Canada.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Metformin_500mg.jpg/320px-Metformin_500mg.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/GI_bleeding_-_tablet_vs_capsule.jpg/320px-GI_bleeding_-_tablet_vs_capsule.jpg',
-    ];
+        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Amoxicillin_Capsules.jpg/320px-Amoxicillin_Capsules.jpg', name:'Amoxicillin Capsules' },
+        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Paracetamol500.jpg/320px-Paracetamol500.jpg', name:'Paracetamol 500mg' },
+        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Ibuprofen_400mg.jpg/320px-Ibuprofen_400mg.jpg', name:'Ibuprofen 400mg' },
+        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Aspirin_Canada.jpg/320px-Aspirin_Canada.jpg', name:'Aspirin' },
+        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Metformin_500mg.jpg/320px-Metformin_500mg.jpg', name:'Metformin 500mg' },
+        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/GI_bleeding_-_tablet_vs_capsule.jpg/320px-GI_bleeding_-_tablet_vs_capsule.jpg', name:'Tablet vs Capsule' },
+    ].map(f => ({ ...f, full: f.thumb, brand: '', source: 'fallback', label: '📦 Sample' }));
 
     function waitFor(sel, cb) {
         const el = document.querySelector(sel);
@@ -407,7 +405,7 @@ document.addEventListener('keydown', e => {
     }
 
     /* ── INJECT BUTTON ── */
-    waitFor('.file-upload-area', (uploadArea) => {
+    waitFor('.file-upload-area', uploadArea => {
         const orDiv = document.createElement('div');
         orDiv.style.cssText = `display:flex;align-items:center;gap:10px;
             margin:10px 0 0;color:var(--text-muted);font-size:12px;`;
@@ -460,22 +458,22 @@ document.addEventListener('keydown', e => {
 
         <!-- Header -->
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);
-                    display:flex;align-items:center;gap:12px;flex-shrink:0;
-                    background:linear-gradient(135deg,rgba(15,111,255,0.06),transparent);">
+                    display:flex;align-items:center;gap:12px;flex-shrink:0;">
           <div style="width:40px;height:40px;border-radius:11px;
                       background:var(--primary-glow);color:var(--primary);
                       display:flex;align-items:center;justify-content:center;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
             </svg>
           </div>
           <div style="flex:1;">
             <div style="font-size:15px;font-weight:700;color:var(--text);">
               Medicine Packet Image Search</div>
             <div style="font-size:11.5px;color:var(--text-muted);margin-top:1px;">
-              Real box &amp; packet photos from Open Drug Facts + NIH RxImage</div>
+              Open Drug Facts · NIH RxImage · Wikimedia</div>
           </div>
           <button id="isc-close" style="
               width:30px;height:30px;border-radius:8px;
@@ -484,7 +482,7 @@ document.addEventListener('keydown', e => {
               display:flex;align-items:center;justify-content:center;">✕</button>
         </div>
 
-        <!-- Search Bar -->
+        <!-- Search -->
         <div style="padding:14px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
           <div style="display:flex;gap:8px;margin-bottom:10px;">
             <div style="flex:1;position:relative;">
@@ -497,7 +495,7 @@ document.addEventListener('keydown', e => {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
               <input id="isc-input" type="text"
-                placeholder="e.g. aspirin, paracetamol, amoxicillin, cough syrup…"
+                placeholder="e.g. aspirin, paracetamol, amoxicillin…"
                 style="width:100%;padding:9px 12px 9px 34px;
                        border:1.5px solid var(--border);border-radius:9px;
                        font-size:13.5px;font-family:'DM Sans',sans-serif;
@@ -508,17 +506,12 @@ document.addEventListener('keydown', e => {
             <button id="isc-btn" style="
                 padding:9px 22px;background:var(--primary);color:#fff;
                 border:none;border-radius:9px;font-size:13.5px;font-weight:600;
-                font-family:'DM Sans',sans-serif;cursor:pointer;
-                transition:filter 0.15s;">Search</button>
+                font-family:'DM Sans',sans-serif;cursor:pointer;">Search</button>
           </div>
-
-          <!-- Source badges + quick tags -->
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span style="font-size:10.5px;font-weight:700;color:var(--text-muted);
-                         text-transform:uppercase;letter-spacing:0.05em;">Quick:</span>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
             ${['aspirin','paracetamol','amoxicillin','ibuprofen','metformin',
                'cetirizine','azithromycin','omeprazole','vitamin c','antacid']
-              .map(t => `<span onclick="iscQuick('${t}')" style="
+              .map(t=>`<span onclick="iscQuick('${t}')" style="
                   padding:3px 10px;border-radius:20px;font-size:11.5px;
                   font-weight:600;background:var(--surface-2);
                   border:1px solid var(--border);
@@ -529,36 +522,7 @@ document.addEventListener('keydown', e => {
           </div>
         </div>
 
-        <!-- Source Tabs -->
-        <div style="display:flex;gap:0;border-bottom:1px solid var(--border);
-                    flex-shrink:0;padding:0 20px;">
-          <button class="isc-tab active" data-src="all"
-            onclick="iscTab(this,'all')"
-            style="padding:9px 16px;border:none;background:none;cursor:pointer;
-                   font-size:12.5px;font-weight:600;color:var(--primary);
-                   border-bottom:2px solid var(--primary);font-family:'DM Sans',sans-serif;">
-            All Sources</button>
-          <button class="isc-tab" data-src="drugfacts"
-            onclick="iscTab(this,'drugfacts')"
-            style="padding:9px 16px;border:none;background:none;cursor:pointer;
-                   font-size:12.5px;font-weight:600;color:var(--text-muted);
-                   border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;">
-            📦 Drug Facts</button>
-          <button class="isc-tab" data-src="rximage"
-            onclick="iscTab(this,'rximage')"
-            style="padding:9px 16px;border:none;background:none;cursor:pointer;
-                   font-size:12.5px;font-weight:600;color:var(--text-muted);
-                   border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;">
-            🏥 NIH RxImage</button>
-          <button class="isc-tab" data-src="wiki"
-            onclick="iscTab(this,'wiki')"
-            style="padding:9px 16px;border:none;background:none;cursor:pointer;
-                   font-size:12.5px;font-weight:600;color:var(--text-muted);
-                   border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;">
-            📚 Wikimedia</button>
-        </div>
-
-        <!-- Image Grid -->
+        <!-- Grid -->
         <div id="isc-grid" style="
             flex:1;overflow-y:auto;padding:14px 20px 16px;
             display:grid;grid-template-columns:repeat(3,1fr);
@@ -567,9 +531,8 @@ document.addEventListener('keydown', e => {
                       padding:4rem 1rem;color:var(--text-muted);">
             <div style="font-size:40px;margin-bottom:12px;">💊</div>
             <div style="font-size:14px;font-weight:600;margin-bottom:4px;">
-              Search for any medicine</div>
-            <div style="font-size:12px;">
-              We'll find real packet &amp; box images for it</div>
+              Search any medicine name</div>
+            <div style="font-size:12px;">Real packet &amp; box photos</div>
           </div>
         </div>
 
@@ -577,16 +540,12 @@ document.addEventListener('keydown', e => {
         <div style="padding:9px 20px;border-top:1px solid var(--border);
                     font-size:11px;color:var(--text-muted);flex-shrink:0;
                     display:flex;justify-content:space-between;align-items:center;">
-          <span>Open Drug Facts • NIH RxImage • Wikimedia Commons</span>
+          <span>Images from open medicine databases</span>
           <span id="isc-count" style="color:var(--primary);font-weight:700;"></span>
         </div>
       </div>`;
 
     document.body.appendChild(overlay);
-
-    /* ── STATE ── */
-    let currentTab = 'all';
-    let allResults  = [];
 
     /* ── OPEN / CLOSE ── */
     function openModal() {
@@ -616,92 +575,10 @@ document.addEventListener('keydown', e => {
     };
     document.getElementById('isc-btn').onclick = doSearch;
 
-    /* ── TAB SWITCH ── */
-    window.iscTab = function(el, src) {
-        document.querySelectorAll('.isc-tab').forEach(t => {
-            t.style.color = 'var(--text-muted)';
-            t.style.borderBottom = '2px solid transparent';
-        });
-        el.style.color = 'var(--primary)';
-        el.style.borderBottom = '2px solid var(--primary)';
-        currentTab = src;
-        renderGrid(src === 'all' ? allResults : allResults.filter(r => r.src === src));
-    };
-
-    /* ── SOURCE 1: Open Drug Facts ── */
-    async function fetchDrugFacts(q) {
-        try {
-            const url = `https://world.opendrugfacts.org/cgi/search.pl?` +
-                `search_terms=${encodeURIComponent(q)}&search_simple=1` +
-                `&action=process&json=1&page_size=20`;
-            const res  = await fetch(url);
-            const data = await res.json();
-            return (data.products || [])
-                .filter(p => p.image_front_url || p.image_url)
-                .map(p => ({
-                    thumb: (p.image_front_thumb_url || p.image_front_url || p.image_url)
-                               .replace('/400.', '/200.'),
-                    full:   p.image_front_url || p.image_url,
-                    name:   p.product_name || p.generic_name || q,
-                    brand:  p.brands || '',
-                    src:   'drugfacts',
-                    label: '📦 Drug Facts'
-                }));
-        } catch(e) { return []; }
-    }
-
-    /* ── SOURCE 2: NIH RxImage ── */
-    async function fetchRxImage(q) {
-        try {
-            const url = `https://rximage.nlm.nih.gov/api/rximage/1/rxnav?` +
-                `name=${encodeURIComponent(q)}&resolution=600`;
-            const res  = await fetch(url);
-            const data = await res.json();
-            return (data.nlmRxImages || [])
-                .filter(img => img.imageUrl)
-                .map(img => ({
-                    thumb: img.imageUrl,
-                    full:  img.imageUrl,
-                    name:  img.name || q,
-                    brand: img.labeler || '',
-                    src:  'rximage',
-                    label: '🏥 NIH'
-                }));
-        } catch(e) { return []; }
-    }
-
-    /* ── SOURCE 3: Wikimedia Commons ── */
-    async function fetchWikimedia(q) {
-        try {
-            const url = `https://commons.wikimedia.org/w/api.php?action=query` +
-                `&generator=search&gsrsearch=${encodeURIComponent(q + ' medicine tablet pharmaceutical')}` +
-                `&gsrnamespace=6&gsrlimit=10&prop=imageinfo` +
-                `&iiprop=url|thumburl|mime&iiurlwidth=320&format=json&origin=*`;
-            const res  = await fetch(url);
-            const data = await res.json();
-            const pages = data?.query?.pages || {};
-            return Object.values(pages)
-                .filter(p => {
-                    const m = p?.imageinfo?.[0]?.mime || '';
-                    return p?.imageinfo?.[0]?.thumburl &&
-                        (m.includes('jpeg') || m.includes('png'));
-                })
-                .map(p => ({
-                    thumb: p.imageinfo[0].thumburl,
-                    full:  p.imageinfo[0].url,
-                    name:  p.title.replace('File:','').replace(/\.[^.]+$/,''),
-                    brand: '',
-                    src:  'wiki',
-                    label: '📚 Wikimedia'
-                }));
-        } catch(e) { return []; }
-    }
-
-    /* ── MAIN SEARCH ── */
+    /* ── SEARCH — calls own server (no CORS) ── */
     async function doSearch() {
         const q = document.getElementById('isc-input').value.trim();
         if (!q) return;
-
         const grid  = document.getElementById('isc-grid');
         const count = document.getElementById('isc-count');
 
@@ -713,78 +590,30 @@ document.addEventListener('keydown', e => {
                         border-top-color:var(--primary);border-radius:50%;
                         animation:spin 0.7s linear infinite;"></div>
             <div style="font-size:13px;">Searching medicine databases…</div>
-            <div style="display:flex;gap:8px;font-size:11.5px;flex-wrap:wrap;justify-content:center;">
-              <span style="padding:3px 10px;border-radius:20px;background:rgba(15,111,255,0.08);
-                           color:var(--primary);">📦 Open Drug Facts</span>
-              <span style="padding:3px 10px;border-radius:20px;background:rgba(15,111,255,0.08);
-                           color:var(--primary);">🏥 NIH RxImage</span>
-              <span style="padding:3px 10px;border-radius:20px;background:rgba(15,111,255,0.08);
-                           color:var(--primary);">📚 Wikimedia</span>
-            </div>
           </div>`;
         count.textContent = '';
 
-        /* Fetch all 3 sources simultaneously */
-        const [drugfacts, rximage, wikimedia] = await Promise.all([
-            fetchDrugFacts(q),
-            fetchRxImage(q),
-            fetchWikimedia(q)
-        ]);
+        try {
+            const res  = await fetch(`/api/imagesearch?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+            let imgs = data.images || [];
 
-        /* Merge + deduplicate */
-        const seen = new Set();
-        allResults = [...drugfacts, ...rximage, ...wikimedia].filter(img => {
-            if (!img.full || seen.has(img.full)) return false;
-            seen.add(img.full);
-            return true;
-        });
+            if (imgs.length === 0) imgs = FALLBACKS;
 
-        /* Use fallbacks if nothing found */
-        if (allResults.length === 0) {
-            allResults = FALLBACKS.map((url, i) => ({
-                thumb: url, full: url,
-                name: `Medicine image ${i+1}`,
-                brand: '', src: 'wiki', label: '📚 Fallback'
-            }));
-            count.textContent = 'Showing general medicine images';
-        } else {
-            count.textContent = `${allResults.length} packet images found`;
+            count.textContent = imgs === FALLBACKS
+                ? 'Showing sample images'
+                : `${imgs.length} images found`;
+
+            renderGrid(grid, imgs);
+        } catch(e) {
+            renderGrid(grid, FALLBACKS);
+            count.textContent = 'Showing sample images';
         }
-
-        /* Reset to all tab */
-        document.querySelectorAll('.isc-tab').forEach(t => {
-            t.style.color = 'var(--text-muted)';
-            t.style.borderBottom = '2px solid transparent';
-        });
-        const allTab = document.querySelector('.isc-tab[data-src="all"]');
-        if (allTab) {
-            allTab.style.color = 'var(--primary)';
-            allTab.style.borderBottom = '2px solid var(--primary)';
-        }
-        currentTab = 'all';
-        renderGrid(allResults);
     }
 
-    /* ── RENDER GRID ── */
-    function renderGrid(imgs) {
-        const grid  = document.getElementById('isc-grid');
-        const count = document.getElementById('isc-count');
+    /* ── RENDER ── */
+    function renderGrid(grid, imgs) {
         grid.innerHTML = '';
-
-        if (imgs.length === 0) {
-            grid.innerHTML = `
-              <div style="grid-column:1/-1;text-align:center;
-                          padding:3rem;color:var(--text-muted);">
-                <div style="font-size:32px;margin-bottom:10px;">😕</div>
-                <div style="font-size:13.5px;font-weight:600;margin-bottom:6px;">
-                  No images in this source</div>
-                <div style="font-size:12px;">Try "All Sources" tab</div>
-              </div>`;
-            return;
-        }
-
-        count.textContent = `${imgs.length} images`;
-
         imgs.forEach(img => {
             const card = document.createElement('div');
             card.style.cssText = `
@@ -793,45 +622,37 @@ document.addEventListener('keydown', e => {
                 position:relative;
                 transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s;`;
 
-            /* Image */
             const imgEl = document.createElement('img');
             imgEl.src     = img.thumb;
             imgEl.alt     = img.name;
             imgEl.loading = 'lazy';
             imgEl.style.cssText = `
-                width:100%;height:160px;
+                width:100%;height:155px;
                 object-fit:contain;display:block;
                 background:#f8f9fb;padding:8px;`;
-            imgEl.onerror = () => card.style.display = 'none';
+            imgEl.onerror = () => { card.style.display = 'none'; };
 
-            /* Source label */
             const srcLabel = document.createElement('div');
-            srcLabel.textContent = img.label;
+            srcLabel.textContent = img.label || '📦';
             srcLabel.style.cssText = `
-                position:absolute;top:6px;left:6px;
-                font-size:10px;font-weight:700;
+                position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;
                 background:rgba(0,0,0,0.55);color:#fff;
                 padding:2px 7px;border-radius:20px;`;
 
-            /* Medicine name */
             const nameEl = document.createElement('div');
             nameEl.style.cssText = `
                 padding:6px 8px 8px;font-size:11.5px;font-weight:600;
                 color:var(--text);white-space:nowrap;overflow:hidden;
                 text-overflow:ellipsis;border-top:1px solid var(--border);`;
-            nameEl.title = img.name + (img.brand ? ` — ${img.brand}` : '');
-            nameEl.textContent = img.name.length > 28
-                ? img.name.slice(0, 28) + '…' : img.name;
+            nameEl.textContent = img.name?.length > 28
+                ? img.name.slice(0, 28) + '…' : (img.name || 'Medicine');
 
-            /* Use button */
             const useBtn = document.createElement('div');
             useBtn.textContent = '✓ Use this';
             useBtn.style.cssText = `
-                position:absolute;bottom:34px;left:50%;
-                transform:translateX(-50%);
-                background:var(--primary);color:#fff;
-                border-radius:20px;padding:5px 14px;
-                font-size:12px;font-weight:700;
+                position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+                background:var(--primary);color:#fff;border-radius:20px;
+                padding:5px 14px;font-size:12px;font-weight:700;
                 opacity:0;transition:opacity 0.15s;
                 white-space:nowrap;pointer-events:none;`;
 
@@ -847,47 +668,34 @@ document.addEventListener('keydown', e => {
                 card.style.boxShadow   = '';
                 useBtn.style.opacity   = '0';
             };
-            card.onclick = () => selectImage(img.full, img.name, card);
-
-            card.appendChild(imgEl);
-            card.appendChild(srcLabel);
-            card.appendChild(nameEl);
-            card.appendChild(useBtn);
+            card.onclick = () => selectImage(img.full || img.thumb, img.name, card);
+            card.append(imgEl, srcLabel, nameEl, useBtn);
             grid.appendChild(card);
         });
     }
 
-    /* ── SELECT IMAGE ── */
+    /* ── SELECT ── */
     function selectImage(url, name, card) {
         card.style.borderColor = '#10b981';
         card.style.boxShadow   = '0 0 0 3px rgba(16,185,129,0.25)';
-
         const preview    = document.getElementById('image-preview');
         const uploadText = document.getElementById('file-upload-content');
         if (preview)    { preview.src = url; preview.classList.remove('hidden'); }
         if (uploadText) { uploadText.classList.add('hidden'); }
-
         let hidden = document.getElementById('med-online-img');
         if (!hidden) {
             hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.id   = 'med-online-img';
-            hidden.name = 'onlineImageUrl';
+            hidden.type = 'hidden'; hidden.id = 'med-online-img'; hidden.name = 'onlineImageUrl';
             document.getElementById('add-med-form')?.appendChild(hidden);
         }
         hidden.value = url;
-
-        setTimeout(() => {
-            closeModal();
-            showToast(`Image selected: ${name} ✓`);
-        }, 280);
+        setTimeout(() => { closeModal(); showToast(`Image selected ✓`); }, 280);
     }
 
     /* ── PATCH FETCH ── */
     const _fetch = window.fetch;
     window.fetch = function(url, opts) {
-        if (typeof url === 'string' &&
-            url.includes('/api/medicines') && opts?.body) {
+        if (typeof url === 'string' && url.includes('/api/medicines') && opts?.body) {
             try {
                 const b = JSON.parse(opts.body);
                 const h = document.getElementById('med-online-img');

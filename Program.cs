@@ -66,6 +66,13 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
     options.MultipartHeadersLengthLimit = int.MaxValue;
 });
 
+// ── NEW: HttpClient for image search proxy ──────────────────────
+builder.Services.AddHttpClient("imagesearch", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.Add("User-Agent", "MediTrack/1.0");
+});
+
 var app = builder.Build();
 
 // Auto-migrate DB
@@ -75,8 +82,7 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 }
 
-// FIX 4: Always return JSON errors (not HTML pages) for API routes
-// This is the main reason JS showed "request failed" - server was returning HTML 500 pages
+// FIX 4: Always return JSON errors for API routes
 app.UseExceptionHandler(errApp =>
 {
     errApp.Run(async ctx =>
