@@ -2472,3 +2472,9 @@ body.dark-mode .ai-search-card { border-top-color: #4d94ff; }
 #img-results::-webkit-scrollbar-thumb {
     background: var(--border); border-radius: 4px;
 }
+
+/* ── MED CARD 3D FIX ─────────────────────────────────────── */
+.med-card {
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    will-change: transform;
+}

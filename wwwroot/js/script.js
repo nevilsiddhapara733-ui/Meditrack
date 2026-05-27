@@ -377,336 +377,96 @@ document.addEventListener('keydown', e => {
     }
 });
 
-
-
-
-
-
 /* ================================================================
-   MEDICINE PACKET IMAGE SEARCH
-   Calls /api/imagesearch (server-side proxy — no CORS issues)
+   MEDICINE CARD 3D TILT
+   - Uses requestAnimationFrame (no lag)
+   - Works on mouse + touch
+   - Resets smoothly on leave
    ================================================================ */
 
-(function injectImageSearch() {
+(function init3DTilt() {
 
-    const FALLBACKS = [
-        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Amoxicillin_Capsules.jpg/320px-Amoxicillin_Capsules.jpg', name:'Amoxicillin Capsules' },
-        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Paracetamol500.jpg/320px-Paracetamol500.jpg', name:'Paracetamol 500mg' },
-        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Ibuprofen_400mg.jpg/320px-Ibuprofen_400mg.jpg', name:'Ibuprofen 400mg' },
-        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Aspirin_Canada.jpg/320px-Aspirin_Canada.jpg', name:'Aspirin' },
-        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Metformin_500mg.jpg/320px-Metformin_500mg.jpg', name:'Metformin 500mg' },
-        { thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/GI_bleeding_-_tablet_vs_capsule.jpg/320px-GI_bleeding_-_tablet_vs_capsule.jpg', name:'Tablet vs Capsule' },
-    ].map(f => ({ ...f, full: f.thumb, brand: '', source: 'fallback', label: '📦 Sample' }));
+    // Only run on non-touch devices for mouse tilt
+    // On touch: do a simple scale pop instead
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-    function waitFor(sel, cb) {
-        const el = document.querySelector(sel);
-        if (el) { cb(el); return; }
-        setTimeout(() => waitFor(sel, cb), 400);
-    }
+    function applyTilt(card) {
+        let rafId   = null;
+        let mouseX  = 0;
+        let mouseY  = 0;
+        let active  = false;
 
-    /* ── INJECT BUTTON ── */
-    waitFor('.file-upload-area', uploadArea => {
-        const orDiv = document.createElement('div');
-        orDiv.style.cssText = `display:flex;align-items:center;gap:10px;
-            margin:10px 0 0;color:var(--text-muted);font-size:12px;`;
-        orDiv.innerHTML = `
-            <div style="flex:1;height:1px;background:var(--border)"></div>
-            <span>or</span>
-            <div style="flex:1;height:1px;background:var(--border)"></div>`;
+        // ── MOUSE (desktop) ─────────────────────────────────────
+        if (!isTouch) {
+            card.addEventListener('mouseenter', () => {
+                active = true;
+                card.style.transition = 'box-shadow 0.2s ease, border-color 0.2s ease';
+            });
 
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.innerHTML = `
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.2">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            Search Medicine Packet Image`;
-        btn.style.cssText = `
-            display:flex;align-items:center;justify-content:center;gap:7px;
-            width:100%;margin-top:8px;padding:10px 14px;
-            background:transparent;border:1.5px dashed var(--primary);
-            border-radius:10px;color:var(--primary);font-size:13.5px;
-            font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;
-            transition:background 0.15s;`;
-        btn.onmouseenter = () => btn.style.background = 'var(--primary-glow)';
-        btn.onmouseleave = () => btn.style.background = 'transparent';
-        btn.onclick = openModal;
-        uploadArea.parentNode.insertBefore(orDiv, uploadArea.nextSibling);
-        uploadArea.parentNode.insertBefore(btn,   orDiv.nextSibling);
-    });
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
 
-    /* ── MODAL ── */
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position:fixed;inset:0;z-index:2000;
-        background:rgba(8,12,24,0.75);
-        display:flex;align-items:center;justify-content:center;
-        padding:1.5rem;opacity:0;pointer-events:none;
-        transition:opacity 0.2s ease;`;
+                if (!rafId) {
+                    rafId = requestAnimationFrame(() => {
+                        if (!active) { rafId = null; return; }
+                        const cx = rect.width  / 2;
+                        const cy = rect.height / 2;
+                        const rx = ((mouseY - cy) / cy) * -7;  // tilt X axis
+                        const ry = ((mouseX - cx) / cx) *  7;  // tilt Y axis
+                        card.style.transform =
+                            `perspective(700px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.03)`;
+                        rafId = null;
+                    });
+                }
+            });
 
-    overlay.innerHTML = `
-      <div id="isc" style="
-          background:var(--surface);border-radius:18px;
-          box-shadow:0 24px 64px rgba(0,0,0,0.3);
-          width:100%;max-width:720px;max-height:90vh;
-          display:flex;flex-direction:column;
-          border:1px solid var(--border);overflow:hidden;
-          transform:scale(0.93) translateY(18px);
-          transition:transform 0.28s cubic-bezier(0.34,1.4,0.64,1);">
+            card.addEventListener('mouseleave', () => {
+                active = false;
+                if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+                card.style.transition = 'transform 0.45s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s ease, border-color 0.2s ease';
+                card.style.transform  = 'perspective(700px) rotateX(0deg) rotateY(0deg) scale(1)';
+            });
+        }
 
-        <!-- Header -->
-        <div style="padding:16px 20px;border-bottom:1px solid var(--border);
-                    display:flex;align-items:center;gap:12px;flex-shrink:0;">
-          <div style="width:40px;height:40px;border-radius:11px;
-                      background:var(--primary-glow);color:var(--primary);
-                      display:flex;align-items:center;justify-content:center;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21 15 16 10 5 21"/>
-            </svg>
-          </div>
-          <div style="flex:1;">
-            <div style="font-size:15px;font-weight:700;color:var(--text);">
-              Medicine Packet Image Search</div>
-            <div style="font-size:11.5px;color:var(--text-muted);margin-top:1px;">
-              Open Drug Facts · NIH RxImage · Wikimedia</div>
-          </div>
-          <button id="isc-close" style="
-              width:30px;height:30px;border-radius:8px;
-              border:1px solid var(--border);background:var(--surface-2);
-              color:var(--text-muted);cursor:pointer;font-size:16px;
-              display:flex;align-items:center;justify-content:center;">✕</button>
-        </div>
+        // ── TOUCH (mobile) ──────────────────────────────────────
+        if (isTouch) {
+            card.addEventListener('touchstart', () => {
+                card.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
+                card.style.transform  = 'scale(1.03)';
+                card.style.boxShadow  = '0 12px 32px rgba(15,111,255,0.18)';
+                card.style.borderColor = 'rgba(15,111,255,0.3)';
+            }, { passive: true });
 
-        <!-- Search -->
-        <div style="padding:14px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
-          <div style="display:flex;gap:8px;margin-bottom:10px;">
-            <div style="flex:1;position:relative;">
-              <svg style="position:absolute;left:11px;top:50%;
-                          transform:translateY(-50%);color:var(--text-muted);
-                          pointer-events:none;"
-                   width="14" height="14" viewBox="0 0 24 24"
-                   fill="none" stroke="currentColor" stroke-width="2.2">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input id="isc-input" type="text"
-                placeholder="e.g. aspirin, paracetamol, amoxicillin…"
-                style="width:100%;padding:9px 12px 9px 34px;
-                       border:1.5px solid var(--border);border-radius:9px;
-                       font-size:13.5px;font-family:'DM Sans',sans-serif;
-                       color:var(--text);background:var(--surface-2);outline:none;"
-                onfocus="this.style.borderColor='var(--primary)'"
-                onblur="this.style.borderColor='var(--border)'"/>
-            </div>
-            <button id="isc-btn" style="
-                padding:9px 22px;background:var(--primary);color:#fff;
-                border:none;border-radius:9px;font-size:13.5px;font-weight:600;
-                font-family:'DM Sans',sans-serif;cursor:pointer;">Search</button>
-          </div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;">
-            ${['aspirin','paracetamol','amoxicillin','ibuprofen','metformin',
-               'cetirizine','azithromycin','omeprazole','vitamin c','antacid']
-              .map(t=>`<span onclick="iscQuick('${t}')" style="
-                  padding:3px 10px;border-radius:20px;font-size:11.5px;
-                  font-weight:600;background:var(--surface-2);
-                  border:1px solid var(--border);
-                  color:var(--text-secondary);cursor:pointer;"
-                onmouseenter="this.style.background='var(--primary-glow)';this.style.color='var(--primary)';this.style.borderColor='var(--primary)'"
-                onmouseleave="this.style.background='var(--surface-2)';this.style.color='var(--text-secondary)';this.style.borderColor='var(--border)'"
-              >${t}</span>`).join('')}
-          </div>
-        </div>
+            card.addEventListener('touchend', () => {
+                card.style.transition  = 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease, border-color 0.2s ease';
+                card.style.transform   = 'scale(1)';
+                card.style.boxShadow   = '';
+                card.style.borderColor = '';
+            }, { passive: true });
 
-        <!-- Grid -->
-        <div id="isc-grid" style="
-            flex:1;overflow-y:auto;padding:14px 20px 16px;
-            display:grid;grid-template-columns:repeat(3,1fr);
-            gap:12px;align-content:start;min-height:240px;">
-          <div style="grid-column:1/-1;text-align:center;
-                      padding:4rem 1rem;color:var(--text-muted);">
-            <div style="font-size:40px;margin-bottom:12px;">💊</div>
-            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">
-              Search any medicine name</div>
-            <div style="font-size:12px;">Real packet &amp; box photos</div>
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div style="padding:9px 20px;border-top:1px solid var(--border);
-                    font-size:11px;color:var(--text-muted);flex-shrink:0;
-                    display:flex;justify-content:space-between;align-items:center;">
-          <span>Images from open medicine databases</span>
-          <span id="isc-count" style="color:var(--primary);font-weight:700;"></span>
-        </div>
-      </div>`;
-
-    document.body.appendChild(overlay);
-
-    /* ── OPEN / CLOSE ── */
-    function openModal() {
-        const n = document.getElementById('med-name');
-        if (n && n.value.trim())
-            document.getElementById('isc-input').value = n.value.trim();
-        overlay.style.opacity = '1';
-        overlay.style.pointerEvents = 'auto';
-        document.getElementById('isc').style.transform = 'scale(1) translateY(0)';
-        document.getElementById('isc-input').focus();
-        if (document.getElementById('isc-input').value.trim()) doSearch();
-    }
-    function closeModal() {
-        overlay.style.opacity = '0';
-        overlay.style.pointerEvents = 'none';
-        document.getElementById('isc').style.transform = 'scale(0.93) translateY(18px)';
-    }
-    document.getElementById('isc-close').onclick = closeModal;
-    overlay.onclick = e => { if (e.target === overlay) closeModal(); };
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && overlay.style.opacity === '1') closeModal();
-        if (e.key === 'Enter'  && overlay.style.opacity === '1') doSearch();
-    });
-    window.iscQuick = q => {
-        document.getElementById('isc-input').value = q;
-        doSearch();
-    };
-    document.getElementById('isc-btn').onclick = doSearch;
-
-    /* ── SEARCH — calls own server (no CORS) ── */
-    async function doSearch() {
-        const q = document.getElementById('isc-input').value.trim();
-        if (!q) return;
-        const grid  = document.getElementById('isc-grid');
-        const count = document.getElementById('isc-count');
-
-        grid.innerHTML = `
-          <div style="grid-column:1/-1;display:flex;flex-direction:column;
-                      align-items:center;justify-content:center;
-                      padding:3.5rem;gap:14px;color:var(--text-muted);">
-            <div style="width:32px;height:32px;border:3px solid var(--border);
-                        border-top-color:var(--primary);border-radius:50%;
-                        animation:spin 0.7s linear infinite;"></div>
-            <div style="font-size:13px;">Searching medicine databases…</div>
-          </div>`;
-        count.textContent = '';
-
-        try {
-            const res  = await fetch(`/api/imagesearch?q=${encodeURIComponent(q)}`);
-            const data = await res.json();
-            let imgs = data.images || [];
-
-            if (imgs.length === 0) imgs = FALLBACKS;
-
-            count.textContent = imgs === FALLBACKS
-                ? 'Showing sample images'
-                : `${imgs.length} images found`;
-
-            renderGrid(grid, imgs);
-        } catch(e) {
-            renderGrid(grid, FALLBACKS);
-            count.textContent = 'Showing sample images';
+            card.addEventListener('touchcancel', () => {
+                card.style.transform   = 'scale(1)';
+                card.style.boxShadow   = '';
+                card.style.borderColor = '';
+            }, { passive: true });
         }
     }
 
-    /* ── RENDER ── */
-    function renderGrid(grid, imgs) {
-        grid.innerHTML = '';
-        imgs.forEach(img => {
-            const card = document.createElement('div');
-            card.style.cssText = `
-                border-radius:10px;overflow:hidden;cursor:pointer;
-                border:2px solid transparent;background:var(--surface-2);
-                position:relative;
-                transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s;`;
-
-            const imgEl = document.createElement('img');
-            imgEl.src     = img.thumb;
-            imgEl.alt     = img.name;
-            imgEl.loading = 'lazy';
-            imgEl.style.cssText = `
-                width:100%;height:155px;
-                object-fit:contain;display:block;
-                background:#f8f9fb;padding:8px;`;
-            imgEl.onerror = () => { card.style.display = 'none'; };
-
-            const srcLabel = document.createElement('div');
-            srcLabel.textContent = img.label || '📦';
-            srcLabel.style.cssText = `
-                position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;
-                background:rgba(0,0,0,0.55);color:#fff;
-                padding:2px 7px;border-radius:20px;`;
-
-            const nameEl = document.createElement('div');
-            nameEl.style.cssText = `
-                padding:6px 8px 8px;font-size:11.5px;font-weight:600;
-                color:var(--text);white-space:nowrap;overflow:hidden;
-                text-overflow:ellipsis;border-top:1px solid var(--border);`;
-            nameEl.textContent = img.name?.length > 28
-                ? img.name.slice(0, 28) + '…' : (img.name || 'Medicine');
-
-            const useBtn = document.createElement('div');
-            useBtn.textContent = '✓ Use this';
-            useBtn.style.cssText = `
-                position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
-                background:var(--primary);color:#fff;border-radius:20px;
-                padding:5px 14px;font-size:12px;font-weight:700;
-                opacity:0;transition:opacity 0.15s;
-                white-space:nowrap;pointer-events:none;`;
-
-            card.onmouseenter = () => {
-                card.style.borderColor = 'var(--primary)';
-                card.style.transform   = 'translateY(-2px)';
-                card.style.boxShadow   = '0 8px 20px rgba(15,111,255,0.15)';
-                useBtn.style.opacity   = '1';
-            };
-            card.onmouseleave = () => {
-                card.style.borderColor = 'transparent';
-                card.style.transform   = '';
-                card.style.boxShadow   = '';
-                useBtn.style.opacity   = '0';
-            };
-            card.onclick = () => selectImage(img.full || img.thumb, img.name, card);
-            card.append(imgEl, srcLabel, nameEl, useBtn);
-            grid.appendChild(card);
+    // Apply to existing cards
+    function tiltAll() {
+        document.querySelectorAll('#inventory-list .med-card:not([data-tilt])').forEach(card => {
+            card.setAttribute('data-tilt', '1');
+            applyTilt(card);
         });
     }
 
-    /* ── SELECT ── */
-    function selectImage(url, name, card) {
-        card.style.borderColor = '#10b981';
-        card.style.boxShadow   = '0 0 0 3px rgba(16,185,129,0.25)';
-        const preview    = document.getElementById('image-preview');
-        const uploadText = document.getElementById('file-upload-content');
-        if (preview)    { preview.src = url; preview.classList.remove('hidden'); }
-        if (uploadText) { uploadText.classList.add('hidden'); }
-        let hidden = document.getElementById('med-online-img');
-        if (!hidden) {
-            hidden = document.createElement('input');
-            hidden.type = 'hidden'; hidden.id = 'med-online-img'; hidden.name = 'onlineImageUrl';
-            document.getElementById('add-med-form')?.appendChild(hidden);
-        }
-        hidden.value = url;
-        setTimeout(() => { closeModal(); showToast(`Image selected ✓`); }, 280);
+    // Apply to new cards as inventory loads
+    const list = document.getElementById('inventory-list');
+    if (list) {
+        new MutationObserver(tiltAll).observe(list, { childList: true });
     }
-
-    /* ── PATCH FETCH ── */
-    const _fetch = window.fetch;
-    window.fetch = function(url, opts) {
-        if (typeof url === 'string' && url.includes('/api/medicines') && opts?.body) {
-            try {
-                const b = JSON.parse(opts.body);
-                const h = document.getElementById('med-online-img');
-                if (b && !b.image && h && h.value) {
-                    b.image = h.value;
-                    opts = { ...opts, body: JSON.stringify(b) };
-                    setTimeout(() => { h.value = ''; }, 300);
-                }
-            } catch(e) {}
-        }
-        return _fetch.call(this, url, opts);
-    };
+    tiltAll();
 
 })();
