@@ -380,26 +380,24 @@ document.addEventListener('keydown', e => {
 
 
 
+
 /* ================================================================
-   ONLINE IMAGE SEARCH — 3 SOURCES, ALWAYS SHOWS RESULTS
-   1. Openverse (millions of CC images, no key)
-   2. Wikimedia Commons (medicine-specific)
-   3. Generic medicine fallbacks (always available)
+   MEDICINE PACKET IMAGE SEARCH
+   Source 1: Open Drug Facts  — real medicine box/packet photos
+   Source 2: RxImage by NIH   — FDA medicine package photos
+   Source 3: Wikimedia        — pharmaceutical fallback
    ================================================================ */
 
 (function injectImageSearch() {
 
-    /* Generic medicine image fallbacks — always available */
-    const FALLBACK_IMGS = [
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Paracetamol500.jpg/320px-Paracetamol500.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Aspirin_Canada.jpg/320px-Aspirin_Canada.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Morphine_vial.jpg/320px-Morphine_vial.jpg',
+    /* Fallback packet images always available */
+    const FALLBACKS = [
         'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Amoxicillin_Capsules.jpg/320px-Amoxicillin_Capsules.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Medicinal_Plants_at_Work.jpg/320px-Medicinal_Plants_at_Work.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/GI_bleeding_-_tablet_vs_capsule.jpg/320px-GI_bleeding_-_tablet_vs_capsule.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Paracetamol500.jpg/320px-Paracetamol500.jpg',
         'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Ibuprofen_400mg.jpg/320px-Ibuprofen_400mg.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Aspirin_Canada.jpg/320px-Aspirin_Canada.jpg',
         'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Metformin_500mg.jpg/320px-Metformin_500mg.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Capsule_on_spoon.jpg/320px-Capsule_on_spoon.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/GI_bleeding_-_tablet_vs_capsule.jpg/320px-GI_bleeding_-_tablet_vs_capsule.jpg',
     ];
 
     function waitFor(sel, cb) {
@@ -426,7 +424,7 @@ document.addEventListener('keydown', e => {
                 <circle cx="11" cy="11" r="8"/>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            Search Image Online`;
+            Search Medicine Packet Image`;
         btn.style.cssText = `
             display:flex;align-items:center;justify-content:center;gap:7px;
             width:100%;margin-top:8px;padding:10px 14px;
@@ -437,11 +435,11 @@ document.addEventListener('keydown', e => {
         btn.onmouseenter = () => btn.style.background = 'var(--primary-glow)';
         btn.onmouseleave = () => btn.style.background = 'transparent';
         btn.onclick = openModal;
-        uploadArea.parentNode.insertBefore(orDiv,  uploadArea.nextSibling);
-        uploadArea.parentNode.insertBefore(btn,    orDiv.nextSibling);
+        uploadArea.parentNode.insertBefore(orDiv, uploadArea.nextSibling);
+        uploadArea.parentNode.insertBefore(btn,   orDiv.nextSibling);
     });
 
-    /* ── MODAL HTML ── */
+    /* ── MODAL ── */
     const overlay = document.createElement('div');
     overlay.style.cssText = `
         position:fixed;inset:0;z-index:2000;
@@ -454,7 +452,7 @@ document.addEventListener('keydown', e => {
       <div id="isc" style="
           background:var(--surface);border-radius:18px;
           box-shadow:0 24px 64px rgba(0,0,0,0.3);
-          width:100%;max-width:700px;max-height:88vh;
+          width:100%;max-width:720px;max-height:90vh;
           display:flex;flex-direction:column;
           border:1px solid var(--border);overflow:hidden;
           transform:scale(0.93) translateY(18px);
@@ -462,22 +460,22 @@ document.addEventListener('keydown', e => {
 
         <!-- Header -->
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);
-                    display:flex;align-items:center;gap:12px;flex-shrink:0;">
-          <div style="width:38px;height:38px;border-radius:10px;
+                    display:flex;align-items:center;gap:12px;flex-shrink:0;
+                    background:linear-gradient(135deg,rgba(15,111,255,0.06),transparent);">
+          <div style="width:40px;height:40px;border-radius:11px;
                       background:var(--primary-glow);color:var(--primary);
                       display:flex;align-items:center;justify-content:center;">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21 15 16 10 5 21"/>
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
           </div>
           <div style="flex:1;">
             <div style="font-size:15px;font-weight:700;color:var(--text);">
-              Search Medicine Image</div>
+              Medicine Packet Image Search</div>
             <div style="font-size:11.5px;color:var(--text-muted);margin-top:1px;">
-              Multiple sources — always finds images</div>
+              Real box &amp; packet photos from Open Drug Facts + NIH RxImage</div>
           </div>
           <button id="isc-close" style="
               width:30px;height:30px;border-radius:8px;
@@ -486,7 +484,7 @@ document.addEventListener('keydown', e => {
               display:flex;align-items:center;justify-content:center;">✕</button>
         </div>
 
-        <!-- Search -->
+        <!-- Search Bar -->
         <div style="padding:14px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
           <div style="display:flex;gap:8px;margin-bottom:10px;">
             <div style="flex:1;position:relative;">
@@ -499,7 +497,7 @@ document.addEventListener('keydown', e => {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
               <input id="isc-input" type="text"
-                placeholder="e.g. paracetamol, amoxicillin, cough syrup…"
+                placeholder="e.g. aspirin, paracetamol, amoxicillin, cough syrup…"
                 style="width:100%;padding:9px 12px 9px 34px;
                        border:1.5px solid var(--border);border-radius:9px;
                        font-size:13.5px;font-family:'DM Sans',sans-serif;
@@ -508,17 +506,19 @@ document.addEventListener('keydown', e => {
                 onblur="this.style.borderColor='var(--border)'"/>
             </div>
             <button id="isc-btn" style="
-                padding:9px 20px;background:var(--primary);color:#fff;
+                padding:9px 22px;background:var(--primary);color:#fff;
                 border:none;border-radius:9px;font-size:13.5px;font-weight:600;
-                font-family:'DM Sans',sans-serif;cursor:pointer;">
-              Search
-            </button>
+                font-family:'DM Sans',sans-serif;cursor:pointer;
+                transition:filter 0.15s;">Search</button>
           </div>
-          <!-- Quick tags -->
-          <div style="display:flex;gap:5px;flex-wrap:wrap;">
-            ${['tablet','capsule','syrup','paracetamol','amoxicillin',
-               'ibuprofen','vitamin','antibiotic','injection','strip']
-              .map(t=>`<span onclick="iscQuick('${t}')" style="
+
+          <!-- Source badges + quick tags -->
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:10.5px;font-weight:700;color:var(--text-muted);
+                         text-transform:uppercase;letter-spacing:0.05em;">Quick:</span>
+            ${['aspirin','paracetamol','amoxicillin','ibuprofen','metformin',
+               'cetirizine','azithromycin','omeprazole','vitamin c','antacid']
+              .map(t => `<span onclick="iscQuick('${t}')" style="
                   padding:3px 10px;border-radius:20px;font-size:11.5px;
                   font-weight:600;background:var(--surface-2);
                   border:1px solid var(--border);
@@ -529,15 +529,47 @@ document.addEventListener('keydown', e => {
           </div>
         </div>
 
-        <!-- Grid -->
+        <!-- Source Tabs -->
+        <div style="display:flex;gap:0;border-bottom:1px solid var(--border);
+                    flex-shrink:0;padding:0 20px;">
+          <button class="isc-tab active" data-src="all"
+            onclick="iscTab(this,'all')"
+            style="padding:9px 16px;border:none;background:none;cursor:pointer;
+                   font-size:12.5px;font-weight:600;color:var(--primary);
+                   border-bottom:2px solid var(--primary);font-family:'DM Sans',sans-serif;">
+            All Sources</button>
+          <button class="isc-tab" data-src="drugfacts"
+            onclick="iscTab(this,'drugfacts')"
+            style="padding:9px 16px;border:none;background:none;cursor:pointer;
+                   font-size:12.5px;font-weight:600;color:var(--text-muted);
+                   border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;">
+            📦 Drug Facts</button>
+          <button class="isc-tab" data-src="rximage"
+            onclick="iscTab(this,'rximage')"
+            style="padding:9px 16px;border:none;background:none;cursor:pointer;
+                   font-size:12.5px;font-weight:600;color:var(--text-muted);
+                   border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;">
+            🏥 NIH RxImage</button>
+          <button class="isc-tab" data-src="wiki"
+            onclick="iscTab(this,'wiki')"
+            style="padding:9px 16px;border:none;background:none;cursor:pointer;
+                   font-size:12.5px;font-weight:600;color:var(--text-muted);
+                   border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;">
+            📚 Wikimedia</button>
+        </div>
+
+        <!-- Image Grid -->
         <div id="isc-grid" style="
             flex:1;overflow-y:auto;padding:14px 20px 16px;
             display:grid;grid-template-columns:repeat(3,1fr);
-            gap:10px;align-content:start;min-height:220px;">
+            gap:12px;align-content:start;min-height:240px;">
           <div style="grid-column:1/-1;text-align:center;
-                      padding:3.5rem 1rem;color:var(--text-muted);">
-            <div style="font-size:36px;margin-bottom:10px;">🔍</div>
-            <div style="font-size:13.5px;">Type a medicine name and click Search</div>
+                      padding:4rem 1rem;color:var(--text-muted);">
+            <div style="font-size:40px;margin-bottom:12px;">💊</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">
+              Search for any medicine</div>
+            <div style="font-size:12px;">
+              We'll find real packet &amp; box images for it</div>
           </div>
         </div>
 
@@ -545,12 +577,16 @@ document.addEventListener('keydown', e => {
         <div style="padding:9px 20px;border-top:1px solid var(--border);
                     font-size:11px;color:var(--text-muted);flex-shrink:0;
                     display:flex;justify-content:space-between;align-items:center;">
-          <span>Sources: <strong>Openverse</strong> + <strong>Wikimedia</strong></span>
-          <span id="isc-count" style="color:var(--primary);font-weight:600;"></span>
+          <span>Open Drug Facts • NIH RxImage • Wikimedia Commons</span>
+          <span id="isc-count" style="color:var(--primary);font-weight:700;"></span>
         </div>
       </div>`;
 
     document.body.appendChild(overlay);
+
+    /* ── STATE ── */
+    let currentTab = 'all';
+    let allResults  = [];
 
     /* ── OPEN / CLOSE ── */
     function openModal() {
@@ -580,24 +616,66 @@ document.addEventListener('keydown', e => {
     };
     document.getElementById('isc-btn').onclick = doSearch;
 
-    /* ── SOURCE 1: Openverse (no key needed) ── */
-    async function fetchOpenverse(q) {
+    /* ── TAB SWITCH ── */
+    window.iscTab = function(el, src) {
+        document.querySelectorAll('.isc-tab').forEach(t => {
+            t.style.color = 'var(--text-muted)';
+            t.style.borderBottom = '2px solid transparent';
+        });
+        el.style.color = 'var(--primary)';
+        el.style.borderBottom = '2px solid var(--primary)';
+        currentTab = src;
+        renderGrid(src === 'all' ? allResults : allResults.filter(r => r.src === src));
+    };
+
+    /* ── SOURCE 1: Open Drug Facts ── */
+    async function fetchDrugFacts(q) {
         try {
-            const url = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(q + ' medicine pharmaceutical')}&page_size=12&license_type=commercial&mature=false`;
+            const url = `https://world.opendrugfacts.org/cgi/search.pl?` +
+                `search_terms=${encodeURIComponent(q)}&search_simple=1` +
+                `&action=process&json=1&page_size=20`;
             const res  = await fetch(url);
             const data = await res.json();
-            return (data.results || [])
-                .filter(r => r.url)
-                .map(r => ({ thumb: r.thumbnail || r.url, full: r.url, name: r.title || q }));
+            return (data.products || [])
+                .filter(p => p.image_front_url || p.image_url)
+                .map(p => ({
+                    thumb: (p.image_front_thumb_url || p.image_front_url || p.image_url)
+                               .replace('/400.', '/200.'),
+                    full:   p.image_front_url || p.image_url,
+                    name:   p.product_name || p.generic_name || q,
+                    brand:  p.brands || '',
+                    src:   'drugfacts',
+                    label: '📦 Drug Facts'
+                }));
         } catch(e) { return []; }
     }
 
-    /* ── SOURCE 2: Wikimedia Commons ── */
+    /* ── SOURCE 2: NIH RxImage ── */
+    async function fetchRxImage(q) {
+        try {
+            const url = `https://rximage.nlm.nih.gov/api/rximage/1/rxnav?` +
+                `name=${encodeURIComponent(q)}&resolution=600`;
+            const res  = await fetch(url);
+            const data = await res.json();
+            return (data.nlmRxImages || [])
+                .filter(img => img.imageUrl)
+                .map(img => ({
+                    thumb: img.imageUrl,
+                    full:  img.imageUrl,
+                    name:  img.name || q,
+                    brand: img.labeler || '',
+                    src:  'rximage',
+                    label: '🏥 NIH'
+                }));
+        } catch(e) { return []; }
+    }
+
+    /* ── SOURCE 3: Wikimedia Commons ── */
     async function fetchWikimedia(q) {
         try {
-            const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search` +
-                `&gsrsearch=${encodeURIComponent(q + ' medicine tablet capsule drug')}` +
-                `&gsrnamespace=6&gsrlimit=12&prop=imageinfo` +
+            const url = `https://commons.wikimedia.org/w/api.php?action=query` +
+                `&generator=search&gsrsearch=${encodeURIComponent(q + ' medicine tablet pharmaceutical')}` +
+                `&gsrnamespace=6&gsrlimit=10&prop=imageinfo` +
                 `&iiprop=url|thumburl|mime&iiurlwidth=320&format=json&origin=*`;
             const res  = await fetch(url);
             const data = await res.json();
@@ -606,17 +684,20 @@ document.addEventListener('keydown', e => {
                 .filter(p => {
                     const m = p?.imageinfo?.[0]?.mime || '';
                     return p?.imageinfo?.[0]?.thumburl &&
-                        (m.includes('jpeg') || m.includes('png') || m.includes('gif'));
+                        (m.includes('jpeg') || m.includes('png'));
                 })
                 .map(p => ({
                     thumb: p.imageinfo[0].thumburl,
                     full:  p.imageinfo[0].url,
-                    name:  p.title.replace('File:','').replace(/\.[^.]+$/,'')
+                    name:  p.title.replace('File:','').replace(/\.[^.]+$/,''),
+                    brand: '',
+                    src:  'wiki',
+                    label: '📚 Wikimedia'
                 }));
         } catch(e) { return []; }
     }
 
-    /* ── MAIN SEARCH — combines all sources ── */
+    /* ── MAIN SEARCH ── */
     async function doSearch() {
         const q = document.getElementById('isc-input').value.trim();
         if (!q) return;
@@ -624,69 +705,133 @@ document.addEventListener('keydown', e => {
         const grid  = document.getElementById('isc-grid');
         const count = document.getElementById('isc-count');
 
-        /* Loading */
         grid.innerHTML = `
           <div style="grid-column:1/-1;display:flex;flex-direction:column;
                       align-items:center;justify-content:center;
-                      padding:3rem;gap:12px;color:var(--text-muted);">
-            <div style="width:30px;height:30px;border:3px solid var(--border);
+                      padding:3.5rem;gap:14px;color:var(--text-muted);">
+            <div style="width:32px;height:32px;border:3px solid var(--border);
                         border-top-color:var(--primary);border-radius:50%;
                         animation:spin 0.7s linear infinite;"></div>
-            <div style="font-size:13px;">Searching across multiple sources…</div>
+            <div style="font-size:13px;">Searching medicine databases…</div>
+            <div style="display:flex;gap:8px;font-size:11.5px;flex-wrap:wrap;justify-content:center;">
+              <span style="padding:3px 10px;border-radius:20px;background:rgba(15,111,255,0.08);
+                           color:var(--primary);">📦 Open Drug Facts</span>
+              <span style="padding:3px 10px;border-radius:20px;background:rgba(15,111,255,0.08);
+                           color:var(--primary);">🏥 NIH RxImage</span>
+              <span style="padding:3px 10px;border-radius:20px;background:rgba(15,111,255,0.08);
+                           color:var(--primary);">📚 Wikimedia</span>
+            </div>
           </div>`;
         count.textContent = '';
 
-        /* Fetch both sources in parallel */
-        const [openverse, wikimedia] = await Promise.all([
-            fetchOpenverse(q),
+        /* Fetch all 3 sources simultaneously */
+        const [drugfacts, rximage, wikimedia] = await Promise.all([
+            fetchDrugFacts(q),
+            fetchRxImage(q),
             fetchWikimedia(q)
         ]);
 
-        /* Merge, deduplicate by URL */
-        let all = [...openverse, ...wikimedia];
+        /* Merge + deduplicate */
         const seen = new Set();
-        all = all.filter(img => {
-            if (seen.has(img.full)) return false;
+        allResults = [...drugfacts, ...rximage, ...wikimedia].filter(img => {
+            if (!img.full || seen.has(img.full)) return false;
             seen.add(img.full);
             return true;
         });
 
-        /* If still no results — use fallbacks */
-        if (all.length === 0) {
-            all = FALLBACK_IMGS.map((url, i) => ({
+        /* Use fallbacks if nothing found */
+        if (allResults.length === 0) {
+            allResults = FALLBACKS.map((url, i) => ({
                 thumb: url, full: url,
-                name: `Medicine image ${i + 1}`
+                name: `Medicine image ${i+1}`,
+                brand: '', src: 'wiki', label: '📚 Fallback'
             }));
             count.textContent = 'Showing general medicine images';
         } else {
-            count.textContent = `${all.length} images found`;
+            count.textContent = `${allResults.length} packet images found`;
         }
 
-        /* Render grid */
+        /* Reset to all tab */
+        document.querySelectorAll('.isc-tab').forEach(t => {
+            t.style.color = 'var(--text-muted)';
+            t.style.borderBottom = '2px solid transparent';
+        });
+        const allTab = document.querySelector('.isc-tab[data-src="all"]');
+        if (allTab) {
+            allTab.style.color = 'var(--primary)';
+            allTab.style.borderBottom = '2px solid var(--primary)';
+        }
+        currentTab = 'all';
+        renderGrid(allResults);
+    }
+
+    /* ── RENDER GRID ── */
+    function renderGrid(imgs) {
+        const grid  = document.getElementById('isc-grid');
+        const count = document.getElementById('isc-count');
         grid.innerHTML = '';
-        all.forEach(img => {
+
+        if (imgs.length === 0) {
+            grid.innerHTML = `
+              <div style="grid-column:1/-1;text-align:center;
+                          padding:3rem;color:var(--text-muted);">
+                <div style="font-size:32px;margin-bottom:10px;">😕</div>
+                <div style="font-size:13.5px;font-weight:600;margin-bottom:6px;">
+                  No images in this source</div>
+                <div style="font-size:12px;">Try "All Sources" tab</div>
+              </div>`;
+            return;
+        }
+
+        count.textContent = `${imgs.length} images`;
+
+        imgs.forEach(img => {
             const card = document.createElement('div');
             card.style.cssText = `
                 border-radius:10px;overflow:hidden;cursor:pointer;
                 border:2px solid transparent;background:var(--surface-2);
-                position:relative;aspect-ratio:4/3;
+                position:relative;
                 transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s;`;
 
+            /* Image */
             const imgEl = document.createElement('img');
-            imgEl.src = img.thumb;
-            imgEl.alt = img.name;
+            imgEl.src     = img.thumb;
+            imgEl.alt     = img.name;
             imgEl.loading = 'lazy';
-            imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+            imgEl.style.cssText = `
+                width:100%;height:160px;
+                object-fit:contain;display:block;
+                background:#f8f9fb;padding:8px;`;
             imgEl.onerror = () => card.style.display = 'none';
 
+            /* Source label */
+            const srcLabel = document.createElement('div');
+            srcLabel.textContent = img.label;
+            srcLabel.style.cssText = `
+                position:absolute;top:6px;left:6px;
+                font-size:10px;font-weight:700;
+                background:rgba(0,0,0,0.55);color:#fff;
+                padding:2px 7px;border-radius:20px;`;
+
+            /* Medicine name */
+            const nameEl = document.createElement('div');
+            nameEl.style.cssText = `
+                padding:6px 8px 8px;font-size:11.5px;font-weight:600;
+                color:var(--text);white-space:nowrap;overflow:hidden;
+                text-overflow:ellipsis;border-top:1px solid var(--border);`;
+            nameEl.title = img.name + (img.brand ? ` — ${img.brand}` : '');
+            nameEl.textContent = img.name.length > 28
+                ? img.name.slice(0, 28) + '…' : img.name;
+
+            /* Use button */
             const useBtn = document.createElement('div');
-            useBtn.textContent = 'Use this image';
+            useBtn.textContent = '✓ Use this';
             useBtn.style.cssText = `
-                position:absolute;bottom:6px;left:50%;
+                position:absolute;bottom:34px;left:50%;
                 transform:translateX(-50%);
                 background:var(--primary);color:#fff;
-                border-radius:20px;padding:4px 12px;
-                font-size:11.5px;font-weight:700;
+                border-radius:20px;padding:5px 14px;
+                font-size:12px;font-weight:700;
                 opacity:0;transition:opacity 0.15s;
                 white-space:nowrap;pointer-events:none;`;
 
@@ -702,15 +847,18 @@ document.addEventListener('keydown', e => {
                 card.style.boxShadow   = '';
                 useBtn.style.opacity   = '0';
             };
-            card.onclick = () => selectImage(img.full, card);
+            card.onclick = () => selectImage(img.full, img.name, card);
+
             card.appendChild(imgEl);
+            card.appendChild(srcLabel);
+            card.appendChild(nameEl);
             card.appendChild(useBtn);
             grid.appendChild(card);
         });
     }
 
     /* ── SELECT IMAGE ── */
-    function selectImage(url, card) {
+    function selectImage(url, name, card) {
         card.style.borderColor = '#10b981';
         card.style.boxShadow   = '0 0 0 3px rgba(16,185,129,0.25)';
 
@@ -721,14 +869,18 @@ document.addEventListener('keydown', e => {
 
         let hidden = document.getElementById('med-online-img');
         if (!hidden) {
-            hidden      = document.createElement('input');
+            hidden = document.createElement('input');
             hidden.type = 'hidden';
             hidden.id   = 'med-online-img';
             hidden.name = 'onlineImageUrl';
             document.getElementById('add-med-form')?.appendChild(hidden);
         }
         hidden.value = url;
-        setTimeout(() => { closeModal(); showToast('Image selected ✓'); }, 280);
+
+        setTimeout(() => {
+            closeModal();
+            showToast(`Image selected: ${name} ✓`);
+        }, 280);
     }
 
     /* ── PATCH FETCH ── */
