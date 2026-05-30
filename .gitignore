@@ -1,0 +1,37 @@
+## ASP.NET Core .gitignore
+
+# Build output
+bin/
+obj/
+publish/
+
+# Local database
+*.db
+*.db-shm
+*.db-wal
+
+# Publish artifacts
+meditrack-publish.zip
+*.zip
+
+# Deployment configs for other platforms (using Render)
+railway.toml
+fly.toml
+
+# Agent/tool files
+.agents/
+skills-lock.json
+
+# User secrets
+secrets.json
+appsettings.Development.json
+
+# VS / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+# OS
+.DS_Store
+Thumbs.db
