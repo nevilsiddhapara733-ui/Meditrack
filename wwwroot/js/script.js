@@ -332,34 +332,60 @@ document.addEventListener('click',function(e){const card=e.target.closest('.stat
 (function() {
     const toolbar = document.querySelector('.inv-toolbar');
     if (!toolbar) return;
+
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;gap:4px;align-items:center;';
+    wrap.className = 'view-toggle-wrap';
     wrap.innerHTML = `
-        <button id="view-grid-btn" title="Grid view" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <button id="view-grid-btn" class="view-toggle-btn active-view" title="Grid view (G)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+            </svg>
         </button>
-        <button id="view-list-btn" title="List view" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+        <button id="view-list-btn" class="view-toggle-btn" title="List view (L)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <circle cx="3" cy="6" r="1.2" fill="currentColor"/>
+                <circle cx="3" cy="12" r="1.2" fill="currentColor"/>
+                <circle cx="3" cy="18" r="1.2" fill="currentColor"/>
+            </svg>
         </button>`;
     toolbar.appendChild(wrap);
 
-    let list = false;
-    document.getElementById('view-grid-btn').onclick = () => {
-        list = false;
-        document.getElementById('inventory-list').style.cssText = '';
-        document.getElementById('view-grid-btn').style.background = 'var(--primary)';
-        document.getElementById('view-grid-btn').style.color = '#fff';
-        document.getElementById('view-list-btn').style.background = 'var(--surface)';
-        document.getElementById('view-list-btn').style.color = 'var(--text-muted)';
-    };
-    document.getElementById('view-list-btn').onclick = () => {
-        list = true;
-        document.getElementById('inventory-list').style.cssText = 'display:flex;flex-direction:column;gap:8px;';
-        document.getElementById('view-list-btn').style.background = 'var(--primary)';
-        document.getElementById('view-list-btn').style.color = '#fff';
-        document.getElementById('view-grid-btn').style.background = 'var(--surface)';
-        document.getElementById('view-grid-btn').style.color = 'var(--text-muted)';
-    };
+    const invList = document.getElementById('inventory-list');
+    const gridBtn = document.getElementById('view-grid-btn');
+    const listBtn = document.getElementById('view-list-btn');
+
+    function setView(isListView) {
+        if (isListView) {
+            invList.classList.add('list-view');
+            listBtn.classList.add('active-view');
+            gridBtn.classList.remove('active-view');
+            localStorage.setItem('meditrack_view', 'list');
+        } else {
+            invList.classList.remove('list-view');
+            gridBtn.classList.add('active-view');
+            listBtn.classList.remove('active-view');
+            localStorage.setItem('meditrack_view', 'grid');
+        }
+    }
+
+    gridBtn.onclick = () => setView(false);
+    listBtn.onclick = () => setView(true);
+
+    // Restore saved preference
+    if (localStorage.getItem('meditrack_view') === 'list') setView(true);
+
+    // Keyboard shortcut: G = grid, L = list
+    document.addEventListener('keydown', e => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.key === 'g' || e.key === 'G') setView(false);
+        if (e.key === 'l' || e.key === 'L') setView(true);
+    });
 })();
 
 // Keyboard shortcuts
