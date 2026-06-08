@@ -496,3 +496,108 @@ document.addEventListener('keydown', e => {
     tiltAll();
 
 })();
+
+/* ================================================================
+   DAYS REMAINING — shows "X days left" next to expiry date
+   in list view. Also fixes equal card heights in list view.
+   ================================================================ */
+
+(function daysRemaining() {
+
+    function calcDays(dateStr) {
+        // Supports: YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY
+        if (!dateStr) return null;
+        const clean = dateStr.trim();
+        let d;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+            d = new Date(clean);
+        } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(clean)) {
+            const parts = clean.split('/');
+            d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        } else {
+            d = new Date(clean);
+        }
+        if (isNaN(d)) return null;
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        d.setHours(0,0,0,0);
+        return Math.round((d - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function badgeFor(days) {
+        if (days === null) return null;
+        const badge = document.createElement('span');
+        badge.className = 'days-remaining-badge';
+        if (days < 0) {
+            badge.classList.add('expired');
+            badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/></svg> Expired`;
+        } else if (days <= 30) {
+            badge.classList.add('danger');
+            badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/></svg> ${days}d left`;
+        } else if (days <= 90) {
+            badge.classList.add('warning');
+            badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/></svg> ${days}d left`;
+        } else {
+            badge.classList.add('safe');
+            badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/></svg> ${days}d left`;
+        }
+        return badge;
+    }
+
+    function injectBadges() {
+        const list = document.getElementById('inventory-list');
+        if (!list) return;
+
+        list.querySelectorAll('.med-card').forEach(card => {
+            // Remove old badges
+            card.querySelectorAll('.days-remaining-badge').forEach(b => b.remove());
+
+            // Find expiry pill
+            const expiryPill = card.querySelector('.med-expiry-pill');
+            if (!expiryPill) return;
+
+            // Extract date text (remove SVG text)
+            const dateText = expiryPill.textContent.trim()
+                .replace(/\s+/g,' ').trim();
+            const days = calcDays(dateText);
+            if (days === null) return;
+
+            const badge = badgeFor(days);
+            if (!badge) return;
+
+            // Insert after expiry pill in the meta row
+            const metaRow = expiryPill.parentNode;
+            if (metaRow) metaRow.insertBefore(badge, expiryPill.nextSibling);
+        });
+    }
+
+    // Run when inventory loads/changes
+    const list = document.getElementById('inventory-list');
+    if (list) {
+        new MutationObserver(() => {
+            setTimeout(injectBadges, 50);
+        }).observe(list, { childList: true });
+    }
+
+    // Also run when switching to list view
+    const listBtn = document.getElementById('view-list-btn');
+    if (listBtn) {
+        listBtn.addEventListener('click', () => setTimeout(injectBadges, 80));
+    }
+
+    // Initial run after page load
+    setTimeout(injectBadges, 800);
+
+})();

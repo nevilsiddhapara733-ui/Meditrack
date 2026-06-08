@@ -4194,3 +4194,113 @@ body.dark-mode .nav-item.active {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ============================================================
+   LIST VIEW — EQUAL HEIGHT FIX + DAYS REMAINING BADGE
+   ============================================================ */
+
+/* Fixed equal height for all list rows */
+#inventory-list.list-view .med-card {
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+    display: grid !important;
+    grid-template-columns: 120px 1fr !important;
+    align-items: stretch !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+}
+#inventory-list.list-view .med-image-wrap {
+    width: 120px !important;
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+    border-radius: 14px 0 0 14px !important;
+    overflow: hidden !important;
+    flex-shrink: 0;
+}
+#inventory-list.list-view .med-image {
+    width: 120px !important;
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+    object-fit: cover !important;
+}
+#inventory-list.list-view .med-details {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 16px !important;
+    padding: 0 16px !important;
+    overflow: hidden !important;
+    height: 100% !important;
+    flex-wrap: nowrap !important;
+}
+#inventory-list.list-view .med-category-tag { display: none !important; }
+#inventory-list.list-view .med-batch {
+    margin-bottom: 0 !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 140px;
+}
+#inventory-list.list-view .med-title {
+    margin-bottom: 0 !important;
+    font-size: 1rem !important;
+    white-space: nowrap;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+#inventory-list.list-view .med-meta-row {
+    margin-bottom: 0 !important;
+    flex-wrap: nowrap !important;
+    flex-shrink: 0;
+    gap: 6px;
+}
+#inventory-list.list-view .card-actions {
+    margin-left: auto !important;
+    display: flex !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    grid-template-columns: unset !important;
+    align-items: center;
+}
+#inventory-list.list-view .edit-btn,
+#inventory-list.list-view .delete-btn {
+    width: auto !important;
+    padding: 6px 14px !important;
+    font-size: 0.79rem !important;
+    white-space: nowrap;
+    height: 34px;
+}
+
+/* Days remaining badge in list view */
+.days-remaining-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.71rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.days-remaining-badge.safe    { background:rgba(17,205,239,0.1); color:#0da8c9; }
+.days-remaining-badge.warning { background:rgba(251,140,0,0.1);  color:#fb8c00; }
+.days-remaining-badge.danger  { background:rgba(245,54,92,0.1);  color:#f5365c; }
+.days-remaining-badge.expired { background:rgba(245,54,92,0.15); color:#f5365c; }
+
+/* Hide days badge in grid view */
+#inventory-list:not(.list-view) .days-remaining-badge { display: none !important; }
+
+/* Make sure status badge still shows on image in list view */
+#inventory-list.list-view .med-status-badge {
+    font-size: 0.6rem !important;
+    padding: 2px 6px !important;
+}
+
+/* Dark mode list view */
+body.dark-mode #inventory-list.list-view .med-card {
+    background: #0b1220 !important;
+    border-color: #1a2840 !important;
+}
