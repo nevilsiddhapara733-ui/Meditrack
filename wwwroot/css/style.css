@@ -2920,305 +2920,6 @@ body.dark-mode .filter-select { background: #0f1620; border-color: #1e2c3e; }
    DESIGN IMPROVEMENTS v3 + LIST VIEW FIX
    ============================================================ */
 
-/* ── LIST VIEW — proper horizontal card layout ───────────── */
-#inventory-list.list-view {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 10px !important;
-}
-#inventory-list.list-view .med-card {
-    display: grid !important;
-    grid-template-columns: 120px 1fr !important;
-    border-radius: 14px !important;
-    min-height: unset !important;
-    animation: fadeSlideUp 0.25s ease both !important;
-}
-#inventory-list.list-view .med-image-wrap {
-    width: 120px;
-    height: 100%;
-    min-height: 90px;
-    border-radius: 14px 0 0 14px;
-    overflow: hidden;
-}
-#inventory-list.list-view .med-image {
-    width: 120px;
-    height: 100%;
-    min-height: 90px;
-    object-fit: cover;
-}
-#inventory-list.list-view .med-details {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 10px 14px;
-    flex-wrap: wrap;
-}
-#inventory-list.list-view .med-category-tag {
-    display: none;
-}
-#inventory-list.list-view .med-title {
-    font-size: 0.95rem;
-    min-width: 140px;
-    flex-shrink: 0;
-}
-#inventory-list.list-view .med-batch {
-    font-size: 0.75rem;
-    min-width: 100px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-}
-#inventory-list.list-view .med-meta-row {
-    margin-bottom: 0;
-    gap: 8px;
-    flex-shrink: 0;
-}
-#inventory-list.list-view .card-actions {
-    margin-left: auto;
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-    grid-template-columns: unset;
-}
-#inventory-list.list-view .edit-btn,
-#inventory-list.list-view .delete-btn {
-    width: auto;
-    padding: 6px 12px;
-    font-size: 0.78rem;
-}
-
-/* ── VIEW TOGGLE BUTTONS ─────────────────────────────────── */
-.view-toggle-wrap {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-.view-toggle-btn {
-    width: 32px; height: 32px;
-    border-radius: 9px;
-    border: 1.5px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-    background: var(--surface);
-    color: var(--text-muted);
-}
-.view-toggle-btn.active-view {
-    background: var(--primary);
-    color: #fff;
-    border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(26,111,255,0.3);
-}
-.view-toggle-btn:hover:not(.active-view) {
-    background: var(--surface-2);
-    color: var(--text);
-    border-color: var(--border);
-}
-
-/* ── BETTER STAT CARDS ───────────────────────────────────── */
-.stat-card {
-    position: relative;
-    overflow: hidden;
-}
-.stat-card::after {
-    content: '';
-    position: absolute;
-    bottom: -20px; right: -20px;
-    width: 90px; height: 90px;
-    border-radius: 50%;
-    opacity: 0.06;
-}
-.stat-total::after    { background: #1a6fff; }
-.stat-expiring::after { background: #ff4757; }
-.stat-lowstock::after { background: #ff9f43; }
-.stat-expiring60::after { background: #f59e0b; }
-.stat-expiring90::after { background: #10b981; }
-
-/* ── BETTER NAV ITEMS ────────────────────────────────────── */
-.nav-item {
-    position: relative;
-    overflow: hidden;
-}
-.nav-item svg {
-    flex-shrink: 0;
-    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
-}
-.nav-item:hover svg { transform: scale(1.15); }
-.nav-item.active svg { color: #93c5fd; }
-
-/* ── BETTER SEARCH ───────────────────────────────────────── */
-.search-wrapper { position: relative; }
-.search-input {
-    padding-right: 80px;
-}
-.search-results-count {
-    position: absolute;
-    right: 12px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 11px; font-weight: 700;
-    color: var(--text-muted);
-    background: var(--surface-2);
-    padding: 2px 8px; border-radius: 20px;
-    border: 1px solid var(--border);
-    pointer-events: none;
-}
-
-/* ── BETTER OVERVIEW PANEL ───────────────────────────────── */
-.panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-}
-.panel-header h3 {
-    font-size: 0.95rem;
-    letter-spacing: -0.01em;
-}
-.panel-badge {
-    font-size: 11px; font-weight: 700;
-    padding: 2px 8px; border-radius: 20px;
-    background: var(--primary-glow);
-    color: var(--primary);
-}
-
-/* ── BETTER MEDICINE CARD DETAILS ────────────────────────── */
-.med-category-tag {
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    border-radius: 6px;
-    padding: 0.2rem 0.65rem;
-    margin-bottom: 0.5rem;
-    display: inline-flex;
-}
-.med-title {
-    font-size: 0.97rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    margin-bottom: 0.3rem;
-}
-.med-batch {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 0.65rem;
-}
-.card-actions { margin-top: 0.75rem; }
-.edit-btn, .delete-btn {
-    border-radius: 9px;
-    font-size: 0.79rem;
-    font-weight: 600;
-    padding: 0.48rem 0;
-}
-
-/* ── BETTER MODAL ────────────────────────────────────────── */
-.modal-card {
-    border-radius: 22px;
-    padding: 1.75rem;
-}
-.modal-header h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.05rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-}
-
-/* ── BETTER ALERT BANNER ─────────────────────────────────── */
-#alert-banner {
-    border-radius: 14px;
-    padding: 1rem 1.25rem;
-}
-.alert-med-chip {
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 0.22rem 0.7rem;
-    transition: transform 0.15s;
-}
-.alert-med-chip:hover { transform: translateY(-1px); }
-
-/* ── BETTER PAGE TRANSITIONS ─────────────────────────────── */
-.page-section.active-page {
-    animation: pageIn 0.28s cubic-bezier(0.22,1,0.36,1) both;
-}
-@keyframes pageIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── BETTER TOAST ────────────────────────────────────────── */
-.toast {
-    font-size: 0.875rem;
-    font-weight: 600;
-    min-width: 220px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.toast svg { flex-shrink: 0; }
-
-/* ── BETTER AI PAGE ──────────────────────────────────────── */
-.ai-info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 1.25rem;
-}
-.ai-info-block {
-    border-radius: 12px;
-    padding: 1rem;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-}
-.ai-info-label {
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-bottom: 0.6rem;
-}
-
-/* ── DARK MODE REFINEMENTS ───────────────────────────────── */
-body.dark-mode .med-card {
-    background: #0f1620;
-    border-color: #1e2c3e;
-}
-body.dark-mode .med-card:hover {
-    border-color: rgba(77,143,255,0.3);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.3), 0 4px 12px rgba(77,143,255,0.1);
-}
-body.dark-mode .stat-card {
-    background: linear-gradient(145deg, #0f1620 0%, #131d2b 100%);
-    border-color: #1e2c3e;
-}
-body.dark-mode .edit-btn { color: var(--text-secondary); }
-body.dark-mode .ai-info-block { background: #131d2b; border-color: #1e2c3e; }
-
-/* ── RESPONSIVE TWEAKS ───────────────────────────────────── */
-@media (max-width: 900px) {
-    #inventory-list.list-view .med-details {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    #inventory-list.list-view .card-actions {
-        width: 100%;
-        margin-left: 0;
-        justify-content: flex-end;
-    }
-}
-@media (max-width: 600px) {
-    #inventory-list.list-view .med-card {
-        grid-template-columns: 90px 1fr !important;
-    }
-    #inventory-list.list-view .med-image-wrap,
-    #inventory-list.list-view .med-image {
-        width: 90px;
-    }
-}
-
 /* ============================================================
    MEDITRACK — PREMIUM DESIGN v4  (performance-safe)
    Compositor-only properties: opacity, transform, color
@@ -4303,4 +4004,162 @@ body.dark-mode .nav-item.active {
 body.dark-mode #inventory-list.list-view .med-card {
     background: #0b1220 !important;
     border-color: #1a2840 !important;
+}
+
+/* ============================================================
+   LIST VIEW — COMPLETE FIX
+   Equal heights + proper row layout
+   ============================================================ */
+
+/* Container becomes a vertical stack */
+#inventory-list.list-view {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+/* Card = strict 96px grid: [image 110px] [details 1fr] */
+#inventory-list.list-view .med-card {
+    display: grid !important;
+    grid-template-columns: 110px 1fr !important;
+    grid-template-rows: 96px !important;
+    height: 96px !important;
+    min-height: 96px !important;
+    max-height: 96px !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+/* Image — exact 110×96, no stretching */
+#inventory-list.list-view .med-image-wrap {
+    width: 110px !important;
+    height: 96px !important;
+    min-height: 96px !important;
+    max-height: 96px !important;
+    border-radius: 14px 0 0 14px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+}
+#inventory-list.list-view .med-image {
+    width: 110px !important;
+    height: 96px !important;
+    min-height: 96px !important;
+    max-height: 96px !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+#inventory-list.list-view .med-image-wrap::after { display: none !important; }
+
+/* Details — single horizontal row, vertically centred */
+#inventory-list.list-view .med-details {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 14px !important;
+    padding: 0 16px !important;
+    height: 96px !important;
+    overflow: hidden !important;
+}
+
+/* Hide category tag — not enough space */
+#inventory-list.list-view .med-category-tag { display: none !important; }
+
+/* Medicine name — fixed width, no wrap */
+#inventory-list.list-view .med-title {
+    font-size: 0.92rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 110px !important;
+    max-width: 155px !important;
+    flex-shrink: 0 !important;
+    margin-bottom: 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* Batch + supplier — fixed width */
+#inventory-list.list-view .med-batch {
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 110px !important;
+    max-width: 165px !important;
+    flex-shrink: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Pills row — qty + expiry side by side */
+#inventory-list.list-view .med-meta-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+/* Days remaining badge */
+.days-left-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1;
+}
+.days-left-pill.dl-safe    { background: rgba(17,205,239,0.1); color: #0da8c9; }
+.days-left-pill.dl-warn    { background: rgba(251,140,0,0.12); color: #fb8c00; }
+.days-left-pill.dl-danger  { background: rgba(245,54,92,0.1);  color: #f5365c; }
+.days-left-pill.dl-expired { background: rgba(245,54,92,0.15); color: #f5365c; font-style: italic; }
+
+/* Hide days pill in grid view */
+#inventory-list:not(.list-view) .days-left-pill { display: none !important; }
+
+/* Action buttons — push to far right */
+#inventory-list.list-view .card-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    grid-template-columns: unset !important;
+    align-items: center !important;
+}
+#inventory-list.list-view .edit-btn,
+#inventory-list.list-view .delete-btn {
+    width: auto !important;
+    padding: 6px 14px !important;
+    height: 32px !important;
+    white-space: nowrap !important;
+    font-size: 0.78rem !important;
+    flex: none !important;
+}
+
+/* Dark mode */
+body.dark-mode #inventory-list.list-view .med-card {
+    background: #0b1220 !important;
+    border-color: #1a2840 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #inventory-list.list-view .med-card {
+        grid-template-columns: 80px 1fr !important;
+    }
+    #inventory-list.list-view .med-image-wrap,
+    #inventory-list.list-view .med-image {
+        width: 80px !important;
+    }
+    #inventory-list.list-view .med-batch { display: none !important; }
 }
