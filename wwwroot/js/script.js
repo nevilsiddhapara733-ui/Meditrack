@@ -161,7 +161,7 @@ function renderMedicines(ft=''){
                     <div class="med-batch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>${med.batch}${med.supplier?' &bull; <span style="color:var(--primary)">'+med.supplier+'</span>':''}</div>
                     <div class="med-meta-row">
                         <div class="${isLow?'med-qty-pill low-qty':'med-qty-pill'}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Qty: ${med.qty}</div>
-                        <div class="${pillCls}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${med.expiry}</div>
+                        <div class="${pillCls}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${med.expiry}</div><div class="days-left-pill ${getDaysLeftCls(d)}">${getDaysLeftTxt(d)}</div>
                     </div>
                     <div class="card-actions">
                         <button class="edit-btn" onclick="openEditModal('${safeId}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
@@ -498,106 +498,88 @@ document.addEventListener('keydown', e => {
 })();
 
 /* ================================================================
-   DAYS REMAINING — shows "X days left" next to expiry date
-   in list view. Also fixes equal card heights in list view.
+   DAYS REMAINING HELPERS + VIEW TOGGLE FIX
    ================================================================ */
 
-(function daysRemaining() {
+// Days remaining helpers — used directly in renderMedicines template
+function getDaysLeftCls(d) {
+    if (d <= 0)   return 'dl-expired';
+    if (d <= 30)  return 'dl-danger';
+    if (d <= 90)  return 'dl-warn';
+    return 'dl-safe';
+}
+function getDaysLeftTxt(d) {
+    if (d <= 0)  return 'Expired';
+    if (d === 1) return '1 day left';
+    return d + 'd left';
+}
 
-    function calcDays(dateStr) {
-        // Supports: YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY
-        if (!dateStr) return null;
-        const clean = dateStr.trim();
-        let d;
-        if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
-            d = new Date(clean);
-        } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(clean)) {
-            const parts = clean.split('/');
-            d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-        } else {
-            d = new Date(clean);
-        }
-        if (isNaN(d)) return null;
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        d.setHours(0,0,0,0);
-        return Math.round((d - today) / (1000 * 60 * 60 * 24));
-    }
+// ── VIEW TOGGLE (replaces old version) ──────────────────────────
+(function setupViewToggle() {
+    // Remove old toggle if exists
+    const oldWrap = document.querySelector('.view-toggle-wrap');
+    if (oldWrap) oldWrap.remove();
 
-    function badgeFor(days) {
-        if (days === null) return null;
-        const badge = document.createElement('span');
-        badge.className = 'days-remaining-badge';
-        if (days < 0) {
-            badge.classList.add('expired');
-            badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/></svg> Expired`;
-        } else if (days <= 30) {
-            badge.classList.add('danger');
-            badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2.5">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/></svg> ${days}d left`;
-        } else if (days <= 90) {
-            badge.classList.add('warning');
-            badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/></svg> ${days}d left`;
-        } else {
-            badge.classList.add('safe');
-            badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2.5">
-                <polyline points="20 6 9 17 4 12"/></svg> ${days}d left`;
-        }
-        return badge;
-    }
+    const toolbar = document.querySelector('.inv-toolbar');
+    if (!toolbar) return;
 
-    function injectBadges() {
-        const list = document.getElementById('inventory-list');
-        if (!list) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'view-toggle-wrap';
+    wrap.style.cssText = 'display:flex;gap:4px;align-items:center;margin-left:8px;';
+    wrap.innerHTML = `
+        <button id="view-grid-btn" class="view-toggle-btn active-view" title="Grid view (G)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+            </svg>
+        </button>
+        <button id="view-list-btn" class="view-toggle-btn" title="List view (L)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <circle cx="3" cy="6" r="1.2" fill="currentColor"/>
+                <circle cx="3" cy="12" r="1.2" fill="currentColor"/>
+                <circle cx="3" cy="18" r="1.2" fill="currentColor"/>
+            </svg>
+        </button>`;
+    toolbar.appendChild(wrap);
 
-        list.querySelectorAll('.med-card').forEach(card => {
-            // Remove old badges
-            card.querySelectorAll('.days-remaining-badge').forEach(b => b.remove());
-
-            // Find expiry pill
-            const expiryPill = card.querySelector('.med-expiry-pill');
-            if (!expiryPill) return;
-
-            // Extract date text (remove SVG text)
-            const dateText = expiryPill.textContent.trim()
-                .replace(/\s+/g,' ').trim();
-            const days = calcDays(dateText);
-            if (days === null) return;
-
-            const badge = badgeFor(days);
-            if (!badge) return;
-
-            // Insert after expiry pill in the meta row
-            const metaRow = expiryPill.parentNode;
-            if (metaRow) metaRow.insertBefore(badge, expiryPill.nextSibling);
-        });
-    }
-
-    // Run when inventory loads/changes
-    const list = document.getElementById('inventory-list');
-    if (list) {
-        new MutationObserver(() => {
-            setTimeout(injectBadges, 50);
-        }).observe(list, { childList: true });
-    }
-
-    // Also run when switching to list view
+    const invList = document.getElementById('inventory-list');
+    const gridBtn = document.getElementById('view-grid-btn');
     const listBtn = document.getElementById('view-list-btn');
-    if (listBtn) {
-        listBtn.addEventListener('click', () => setTimeout(injectBadges, 80));
+
+    function setView(isList) {
+        if (!invList || !gridBtn || !listBtn) return;
+        if (isList) {
+            invList.classList.add('list-view');
+            listBtn.classList.add('active-view');
+            gridBtn.classList.remove('active-view');
+        } else {
+            invList.classList.remove('list-view');
+            gridBtn.classList.add('active-view');
+            listBtn.classList.remove('active-view');
+        }
+        try { localStorage.setItem('mt_view', isList ? 'list' : 'grid'); } catch(e) {}
     }
 
-    // Initial run after page load
-    setTimeout(injectBadges, 800);
+    gridBtn.addEventListener('click', () => setView(false));
+    listBtn.addEventListener('click', () => setView(true));
 
+    // Restore saved preference
+    try {
+        if (localStorage.getItem('mt_view') === 'list') setView(true);
+    } catch(e) {}
+
+    // Keyboard: G = grid, L = list
+    document.addEventListener('keydown', e => {
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (e.key === 'g' || e.key === 'G') setView(false);
+        if (e.key === 'l' || e.key === 'L') setView(true);
+    });
 })();

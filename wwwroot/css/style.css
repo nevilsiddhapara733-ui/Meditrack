@@ -2060,10 +2060,6 @@ body.dark-mode .profile-edit-card  { background: var(--surface); }
     from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.9); }
     to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
 }
-@keyframes toastOut {
-    from { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
-    to   { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.95); }
-}
 
 /* ── 8. MODAL ANIMATIONS ────────────────────────────────── */
 .modal-overlay {
@@ -3616,10 +3612,6 @@ body {
 .modal-card.modal-in {
     animation: modalSpring 0.32s cubic-bezier(0.34,1.56,0.64,1) both;
 }
-@keyframes modalSpring {
-    from { opacity: 0; transform: scale(0.92) translateY(20px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-}
 .modal-header h3 {
     font-family: 'Syne', sans-serif;
     font-size: 1.05rem;
@@ -4162,4 +4154,420 @@ body.dark-mode #inventory-list.list-view .med-card {
         width: 80px !important;
     }
     #inventory-list.list-view .med-batch { display: none !important; }
+}
+
+/* ============================================================
+   COMPLETE FIX — Badge + Buttons + Animations v5
+   Only transform & opacity — zero lag guaranteed
+   ============================================================ */
+
+/* ── MEDICINE CARD — FULL RESET ──────────────────────────── */
+.inventory-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+}
+.med-card {
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid #e8ecf4;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(14,23,38,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    animation: cardIn 0.35s ease both;
+    display: flex;
+    flex-direction: column;
+}
+body.dark-mode .med-card {
+    background: #0c1422;
+    border-color: #1c2a3e;
+}
+.med-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(22,104,245,0.13), 0 4px 12px rgba(0,0,0,0.07);
+    border-color: rgba(22,104,245,0.25);
+}
+
+/* ── STATUS BADGE — FIXED ─────────────────────────────────── */
+.med-image-wrap {
+    position: relative;
+    overflow: hidden;  /* keep this for image zoom */
+    height: 165px;
+    flex-shrink: 0;
+    background: #f0f2f8;
+}
+body.dark-mode .med-image-wrap { background: #141e2c; }
+
+.med-image {
+    width: 100%;
+    height: 165px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+.med-card:hover .med-image { transform: scale(1.06); }
+
+/* Badge — positioned OUTSIDE overflow so it never clips */
+.med-status-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;           /* move to left — more visible */
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    line-height: 1.3;
+}
+.status-ok      { background: #11cdef; color: #fff; }
+.status-warn    { background: #f5365c; color: #fff; animation: badgePulse 2s ease-in-out infinite; }
+.status-expired { background: #f5365c; color: #fff; }
+.status-warn60  { background: #fb8c00; color: #fff; }
+.status-warn90  { background: #fbbf24; color: #111; }
+
+/* Dark gradient overlay on image */
+.med-image-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ── MEDICINE DETAILS ─────────────────────────────────────── */
+.med-details {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0;
+}
+.med-category-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 5px;
+    margin-bottom: 7px;
+    display: inline-flex;
+    width: fit-content;
+}
+.med-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.med-batch {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.med-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+.med-qty-pill, .med-expiry-pill,
+.expiry-ok, .expiring-soon, .expiring-60, .expiring-90, .expiry-expired {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.71rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+.med-qty-pill     { background: rgba(22,104,245,0.08);  color: #1668f5; }
+.med-qty-pill.low-qty { background: rgba(251,140,0,0.1); color: #fb8c00; }
+.expiry-ok        { background: rgba(17,205,239,0.1);   color: #0da8c9; }
+.expiry-expired   { background: rgba(245,54,92,0.1);    color: #f5365c; }
+.expiring-soon    { background: rgba(245,54,92,0.1);    color: #f5365c; }
+.expiring-60      { background: rgba(251,140,0,0.1);    color: #fb8c00; }
+.expiring-90      { background: rgba(245,158,11,0.1);   color: #d97706; }
+
+/* Days remaining pill */
+.days-left-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.69rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+.dl-safe    { background: rgba(17,205,239,0.1);  color: #0da8c9; }
+.dl-warn    { background: rgba(251,140,0,0.12);  color: #fb8c00; }
+.dl-danger  { background: rgba(245,54,92,0.1);   color: #f5365c; }
+.dl-expired { background: rgba(245,54,92,0.15);  color: #f5365c; }
+
+#inventory-list:not(.list-view) .days-left-pill { display: none !important; }
+
+.card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: auto;
+}
+.edit-btn, .delete-btn {
+    padding: 7px 0;
+    border: 1.5px solid #e8ecf4;
+    border-radius: 9px;
+    font-size: 0.79rem;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+    width: 100%;
+}
+.edit-btn:hover {
+    background: rgba(22,104,245,0.07);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+.delete-btn:hover {
+    background: rgba(245,54,92,0.07);
+    border-color: #f5365c;
+    color: #f5365c;
+    transform: translateY(-1px);
+}
+body.dark-mode .edit-btn,
+body.dark-mode .delete-btn {
+    border-color: #1c2a3e;
+    color: #6a8aaa;
+}
+
+/* ── VIEW TOGGLE BUTTONS — REDESIGNED ────────────────────── */
+.view-toggle-wrap {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    background: #f0f3fa;
+    border-radius: 10px;
+    padding: 3px;
+    border: 1px solid #e4e8f0;
+}
+body.dark-mode .view-toggle-wrap {
+    background: #0f1928;
+    border-color: #1c2a3e;
+}
+.view-toggle-btn {
+    width: 32px;
+    height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #9aafc4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.view-toggle-btn:hover:not(.active-view) {
+    background: rgba(22,104,245,0.08);
+    color: var(--primary);
+}
+.view-toggle-btn.active-view {
+    background: #fff;
+    color: var(--primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+body.dark-mode .view-toggle-btn.active-view {
+    background: #1a2840;
+    box-shadow: none;
+}
+
+/* ── INVENTORY TOOLBAR LAYOUT ────────────────────────────── */
+.inv-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.sort-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+
+/* ── CARD ENTRANCE ANIMATION ─────────────────────────────── */
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+/* Stagger */
+.med-card:nth-child(1)  { animation-delay: 0.02s; }
+.med-card:nth-child(2)  { animation-delay: 0.05s; }
+.med-card:nth-child(3)  { animation-delay: 0.08s; }
+.med-card:nth-child(4)  { animation-delay: 0.11s; }
+.med-card:nth-child(5)  { animation-delay: 0.14s; }
+.med-card:nth-child(6)  { animation-delay: 0.17s; }
+.med-card:nth-child(7)  { animation-delay: 0.20s; }
+.med-card:nth-child(8)  { animation-delay: 0.23s; }
+.med-card:nth-child(9)  { animation-delay: 0.26s; }
+.med-card:nth-child(n+10) { animation-delay: 0.28s; }
+
+/* ── STAT CARD NUMBER COUNTER ANIMATION ──────────────────── */
+.stat-value {
+    animation: countUp 0.6s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(10px) scale(0.9); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── PAGE ENTER ANIMATION ────────────────────────────────── */
+.page-section.active-page {
+    animation: pageEnter 0.28s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes pageEnter {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SIDEBAR NAV ITEM SLIDE ──────────────────────────────── */
+.nav-item {
+    animation: navSlide 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+.nav-links .nav-item:nth-child(1) { animation-delay: 0.05s; }
+.nav-links .nav-item:nth-child(2) { animation-delay: 0.09s; }
+.nav-links .nav-item:nth-child(3) { animation-delay: 0.13s; }
+.nav-links .nav-item:nth-child(4) { animation-delay: 0.17s; }
+.nav-links .nav-item:nth-child(5) { animation-delay: 0.21s; }
+.nav-links .nav-item:nth-child(6) { animation-delay: 0.25s; }
+@keyframes navSlide {
+    from { opacity: 0; transform: translateX(-14px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── OVERVIEW PANEL SLIDE UP ─────────────────────────────── */
+.overview-panel {
+    animation: panelUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+.overview-panels .overview-panel:nth-child(1) { animation-delay: 0.05s; }
+.overview-panels .overview-panel:nth-child(2) { animation-delay: 0.12s; }
+@keyframes panelUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── STAT CARD ENTRANCE ──────────────────────────────────── */
+.stat-card {
+    animation: statPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.stats-grid .stat-card:nth-child(1) { animation-delay: 0.04s; }
+.stats-grid .stat-card:nth-child(2) { animation-delay: 0.08s; }
+.stats-grid .stat-card:nth-child(3) { animation-delay: 0.12s; }
+.stats-grid .stat-card:nth-child(4) { animation-delay: 0.16s; }
+.stats-grid .stat-card:nth-child(5) { animation-delay: 0.20s; }
+@keyframes statPop {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── MODAL SPRING ────────────────────────────────────────── */
+.modal-card.modal-in {
+    animation: modalSpring 0.32s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes modalSpring {
+    from { opacity: 0; transform: scale(0.88) translateY(24px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── TOAST SLIDE ─────────────────────────────────────────── */
+.toast.show {
+    animation: toastSlide 0.35s cubic-bezier(0.34,1.4,0.64,1) both;
+}
+.toast.hide {
+    animation: toastOut 0.22s ease forwards;
+}
+@keyframes toastSlide {
+    from { opacity: 0; transform: translateX(50px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+    to { opacity: 0; transform: translateX(50px); }
+}
+
+/* ── EXPIRY BADGE PULSE (only for critical <30d) ─────────── */
+.status-warn {
+    animation: badgePulse 2.2s ease-in-out infinite;
+}
+@keyframes badgePulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.65; }
+}
+
+/* ── SEARCH BAR FOCUS ANIMATE ────────────────────────────── */
+.search-input {
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.search-input:focus {
+    transform: scaleX(1.008);
+    transform-origin: left;
+}
+
+/* ── BUTTON PRESS ────────────────────────────────────────── */
+.btn-login:active,
+.btn-submit:active,
+.btn-add-quick:active,
+.btn-ai-search:active {
+    transform: scale(0.97) !important;
+    transition-duration: 0.08s !important;
+}
+
+/* ── FILTER PILL ACTIVE BOUNCE ───────────────────────────── */
+.cat-filter-pill {
+    transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1);
+}
+.cat-filter-pill.active,
+.cat-filter-pill:hover {
+    transform: translateY(-2px);
+}
+
+/* ── LOGO PULSE ON LOAD ──────────────────────────────────── */
+.brand-icon-sm {
+    animation: logoPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+}
+@keyframes logoPop {
+    from { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+    to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* ── REDUCED MOTION ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
 }

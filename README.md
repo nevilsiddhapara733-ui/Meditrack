@@ -51,7 +51,7 @@ dotnet run
 ```
 https://localhost:5001
 ```
-
+               
 ### 5. Register & use
 - Click **Register** → create your account
 - Fill in your pharmacy profile
