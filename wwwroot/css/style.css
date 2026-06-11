@@ -4571,3 +4571,170 @@ body.dark-mode .view-toggle-btn.active-view {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ============================================================
+   BADGE FIX v2 — positioned on .med-card (not image-wrap)
+   VIEW TOGGLE — premium pill redesign
+   ============================================================ */
+
+/* Med card must be relative for badge positioning */
+.med-card { position: relative !important; }
+
+/* Badge — direct child of .med-card, never clipped */
+.med-status-badge {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 20 !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    line-height: 1.3 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+    white-space: nowrap !important;
+}
+
+/* Badge colours */
+.status-ok {
+    background: #11cdef !important;
+    color: #fff !important;
+    animation: none !important;
+}
+.status-warn {
+    background: #f5365c !important;
+    color: #fff !important;
+    animation: urgentPulse 1.8s ease-in-out infinite !important;
+}
+.status-expired {
+    background: #370c14 !important;
+    color: #ff8a9a !important;
+    border: 1px solid #f5365c !important;
+    animation: none !important;
+}
+.status-warn60 {
+    background: #fb8c00 !important;
+    color: #fff !important;
+    animation: none !important;
+}
+.status-warn90 {
+    background: #fbbf24 !important;
+    color: #2d1f00 !important;
+    animation: none !important;
+}
+
+@keyframes urgentPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.78; transform: scale(1.04); }
+}
+
+/* Image wrap — just the image, no badge inside */
+.med-image-wrap {
+    overflow: hidden !important;
+    border-radius: 18px 18px 0 0 !important;
+    height: 168px !important;
+    flex-shrink: 0 !important;
+    background: #eef0f8 !important;
+    position: relative !important;
+}
+body.dark-mode .med-image-wrap { background: #141e2c !important; }
+
+.med-image {
+    width: 100% !important;
+    height: 168px !important;
+    object-fit: cover !important;
+    display: block !important;
+    transition: transform 0.4s ease !important;
+}
+.med-card:hover .med-image { transform: scale(1.06) !important; }
+
+/* Gradient overlay stays on image-wrap */
+.med-image-wrap::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    height: 45% !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.28), transparent) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+}
+
+/* ── VIEW TOGGLE — PREMIUM PILL ──────────────────────────── */
+.view-toggle-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+    background: var(--surface-3) !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 12px !important;
+    padding: 3px !important;
+    overflow: hidden !important;
+}
+body.dark-mode .view-toggle-wrap {
+    background: #0f1928 !important;
+    border-color: #1c2a3e !important;
+}
+
+.view-toggle-btn {
+    width: 36px !important;
+    height: 32px !important;
+    border: none !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease !important;
+    position: relative !important;
+}
+.view-toggle-btn:hover:not(.active-view) {
+    color: var(--primary) !important;
+    transform: scale(1.08) !important;
+}
+.view-toggle-btn.active-view {
+    background: var(--primary) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(22,104,245,0.35) !important;
+    transform: scale(1) !important;
+}
+body.dark-mode .view-toggle-btn.active-view {
+    background: var(--primary) !important;
+    box-shadow: 0 2px 10px rgba(77,143,255,0.35) !important;
+}
+
+/* Tooltip on hover */
+.view-toggle-btn[title]:hover::after {
+    content: attr(title) !important;
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: #0a1020 !important;
+    color: #fff !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+    pointer-events: none !important;
+    z-index: 100 !important;
+}
+
+/* ── LIST VIEW — BADGE IN LIST MODE ──────────────────────── */
+#inventory-list.list-view .med-status-badge {
+    top: 6px !important;
+    right: 6px !important;
+    font-size: 0.62rem !important;
+    padding: 3px 7px !important;
+}
+
+/* ── GRID CARD — ensure proper stacking ─────────────────── */
+#inventory-list:not(.list-view) .med-card {
+    display: flex !important;
+    flex-direction: column !important;
+}

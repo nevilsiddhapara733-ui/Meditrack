@@ -151,9 +151,9 @@ function renderMedicines(ft=''){
               safeId=med.id,safeName=med.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
         inventoryList.insertAdjacentHTML('beforeend',`
             <div class="med-card" style="animation-delay:${i*0.04}s">
+                <div class="med-status-badge ${badge.cls}">${badge.label}</div>
                 <div class="med-image-wrap">
                     <img src="${med.image||'https://images.unsplash.com/photo-1584308666744-24d5e4a8389c?w=400&q=80'}" alt="${med.name}" class="med-image">
-                    <div class="med-status-badge ${badge.cls}">${badge.label}</div>
                 </div>
                 <div class="med-details">
                     <div class="med-category-tag ${catClass}">${catLabel}</div>
