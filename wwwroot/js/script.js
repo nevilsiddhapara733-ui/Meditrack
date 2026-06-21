@@ -64,8 +64,47 @@ function setHeaderDate() {
 }
 function greetUser() {
     const h = new Date().getHours();
-    const el = document.querySelector('#page-overview .page-header h1');
+    const el = document.getElementById('ov-greeting');
     if (el) el.textContent = h < 12 ? 'Good morning 👋' : h < 17 ? 'Good afternoon 👋' : 'Good evening 👋';
+}
+
+/* Live clock */
+function startClock() {
+    const el = document.getElementById('ov-clock'); if (!el) return;
+    function tick() {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+    tick();
+    setInterval(tick, 1000);
+}
+
+/* Stock health bars */
+function updateHealthBars() {
+    if (!medicines.length) {
+        ['safe','90','60','30','exp'].forEach(k => {
+            const f = document.getElementById('hb-' + k); if (f) f.style.width = '0%';
+            const v = document.getElementById('hv-' + k); if (v) v.textContent = '0';
+        });
+        return;
+    }
+    let safe = 0, d90 = 0, d60 = 0, d30 = 0, exp = 0;
+    medicines.forEach(m => {
+        const d = daysDiff(m.expiry);
+        if (d <= 0)        exp++;
+        else if (d <= 30)  d30++;
+        else if (d <= 60)  d60++;
+        else if (d <= 90)  d90++;
+        else               safe++;
+    });
+    const total = medicines.length;
+    const bars = { safe, '90': d90, '60': d60, '30': d30, exp };
+    Object.entries(bars).forEach(([k, v]) => {
+        const f = document.getElementById('hb-' + k);
+        const vEl = document.getElementById('hv-' + k);
+        if (f) setTimeout(() => { f.style.width = Math.round((v / total) * 100) + '%'; }, 120);
+        if (vEl) vEl.textContent = v;
+    });
 }
 function daysDiff(expiry) { return Math.ceil((new Date(expiry) - new Date()) / 86400000); }
 
@@ -141,9 +180,15 @@ window.switchTab = function(tab) {
     if (tab === 'login') {
         lw.classList.remove('hidden'); rw.classList.add('hidden');
         tl.classList.add('active'); tr.classList.remove('active');
+        // replay entrance animation
+        lw.style.animation = 'none';
+        requestAnimationFrame(() => { lw.style.animation = ''; });
     } else {
         lw.classList.add('hidden'); rw.classList.remove('hidden');
         tl.classList.remove('active'); tr.classList.add('active');
+        // replay entrance animation
+        rw.style.animation = 'none';
+        requestAnimationFrame(() => { rw.style.animation = ''; });
     }
 };
 
@@ -166,7 +211,7 @@ async function enterDashboard(email) {
     loginPage.classList.add('hidden');
     profilePage.classList.add('hidden');
     dashboardPage.classList.remove('hidden');
-    greetUser(); setHeaderDate();
+    greetUser(); setHeaderDate(); startClock();
     alertDismissed = false;
     await loadMedicines();
     initParticles();
@@ -415,15 +460,28 @@ function renderMedicines(ft = '') {
 /* ── EXPIRY SUMMARY PANEL ────────────────────────────────────── */
 function updateExpirySummary() {
     const c = document.getElementById('expiry-summary'); if (!c) return;
-    if (!medicines.length) { c.innerHTML = '<div class="empty-panel-msg">No medicines added yet.</div>'; return; }
-    const s = [...medicines].sort((a,b) => new Date(a.expiry) - new Date(b.expiry)).slice(0, 5);
-    c.innerHTML = s.map(med => {
+    const badge = document.getElementById('ov-expiry-count');
+    if (!medicines.length) {
+        c.innerHTML = '<div class="empty-panel-msg">No medicines added yet.</div>';
+        if (badge) badge.textContent = '0 items';
+        updateHealthBars();
+        return;
+    }
+    const sorted = [...medicines].sort((a,b) => new Date(a.expiry) - new Date(b.expiry)).slice(0, 6);
+    if (badge) badge.textContent = medicines.length + ' items';
+    c.innerHTML = sorted.map(med => {
         const d = daysDiff(med.expiry);
+        const cls = d <= 0 ? 'expiry-badge badge-expired' : d <= 30 ? 'expiry-badge badge-warn' : 'expiry-badge badge-ok';
+        const lbl = d <= 0 ? 'Expired' : d <= 30 ? d + 'd left' : 'Safe';
         return `<div class="expiry-row">
-            <div><div class="expiry-row-name">${med.name}</div><div class="expiry-row-date">${med.expiry}</div></div>
-            <span class="${d <= 30 ? 'expiry-badge badge-warn' : 'expiry-badge badge-ok'}">${d <= 0 ? 'Expired' : d <= 30 ? d + 'd left' : 'Safe'}</span>
+            <div>
+                <div class="expiry-row-name">${med.name}</div>
+                <div class="expiry-row-date">${med.expiry}</div>
+            </div>
+            <span class="${cls}">${lbl}</span>
         </div>`;
     }).join('');
+    updateHealthBars();
 }
 
 /* ── ALERT BANNER ────────────────────────────────────────────── */
@@ -666,6 +724,10 @@ function renderCharts() {
 }
 
 /* ── EXPORT PDF ──────────────────────────────────────────────── */
+// Overview page export shortcut
+const ovExportBtn = document.getElementById('ov-export-btn');
+if (ovExportBtn) ovExportBtn.addEventListener('click', () => document.getElementById('export-pdf-btn').click());
+
 document.getElementById('export-pdf-btn').addEventListener('click', () => {
     if (!medicines.length) { showToast('No medicines to export.'); return; }
     const { jsPDF } = window.jspdf, doc = new jsPDF();

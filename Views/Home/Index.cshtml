@@ -275,37 +275,197 @@
         <main class="main-content">
             <!-- OVERVIEW -->
             <section id="page-overview" class="page-section active-page">
-                <div class="page-header">
-                    <div><h1>Good morning 👋</h1><p class="page-subtitle">Here's your pharmacy snapshot for today</p></div>
-                    <div style="display:flex;align-items:center;gap:0.75rem;">
+
+                <!-- Header -->
+                <div class="ov-header">
+                    <div class="ov-header-left">
+                        <h1 id="ov-greeting">Good morning 👋</h1>
+                        <p class="ov-subtitle">Here's your pharmacy snapshot for today</p>
+                    </div>
+                    <div class="ov-header-right">
+                        <div class="ov-datetime">
+                            <div class="ov-date" id="header-date"></div>
+                            <div class="ov-clock" id="ov-clock"></div>
+                        </div>
                         <button class="btn-notify" id="notify-btn" title="Enable expiry notifications">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                         </button>
-                        <div class="header-date" id="header-date"></div>
                     </div>
                 </div>
+
+                <!-- Stats Grid -->
                 <div class="stats-grid">
-                    <div class="stat-card stat-total"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="stat-info"><p class="stat-label">Total Medicines</p><p class="stat-value" id="total-count">0</p></div></div>
-                    <div class="stat-card stat-expiring"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div><div class="stat-info"><p class="stat-label">Expiring Soon <span>in &lt; 30 days</span></p><p class="stat-value" id="expiring-count">0</p></div></div>
-                    <div class="stat-card stat-lowstock"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="stat-info"><p class="stat-label">Low Stock <span>qty below 10</span></p><p class="stat-value" id="low-stock-count">0</p></div></div>
-                    <div class="stat-card stat-expiring60"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div><div class="stat-info"><p class="stat-label">Expiring Soon <span>in &lt; 60 days</span></p><p class="stat-value" id="expiring60-count">0</p></div></div>
-                    <div class="stat-card stat-expiring90"><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div><div class="stat-info"><p class="stat-label">Expiring Soon <span>in &lt; 90 days</span></p><p class="stat-value" id="expiring90-count">0</p></div></div>
-                </div>
-                <div class="overview-panels">
-                    <div class="overview-panel">
-                        <div class="panel-header"><h3>Quick Tips</h3></div>
-                        <div class="tips-list">
-                            <div class="tip-item"><div class="tip-dot tip-green"></div><p>Add medicines with image, batch number and expiry for complete records.</p></div>
-                            <div class="tip-item"><div class="tip-dot tip-red"></div><p>Medicines expiring in under 30 days are highlighted in red automatically.</p></div>
-                            <div class="tip-item"><div class="tip-dot tip-yellow"></div><p>Items with quantity below 10 are flagged as low stock in orange.</p></div>
-                            <div class="tip-item"><div class="tip-dot tip-blue"></div><p>Your inventory is saved per user — log in from any device.</p></div>
+                    <div class="stat-card stat-total" onclick="document.querySelector('[data-target=page-inventory]').click()" style="cursor:pointer">
+                        <div class="stat-top-row">
+                            <div class="stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            </div>
+                            <span class="stat-arrow">→</span>
+                        </div>
+                        <div class="stat-value" id="total-count">0</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Total Medicines</p>
+                            <p class="stat-sub">in inventory</p>
                         </div>
                     </div>
-                    <div class="overview-panel">
-                        <div class="panel-header"><h3>Expiry Status</h3></div>
-                        <div id="expiry-summary" class="expiry-summary"><div class="empty-panel-msg">No medicines added yet.</div></div>
+                    <div class="stat-card stat-expiring" onclick="document.querySelector('[data-target=page-inventory]').click()" style="cursor:pointer">
+                        <div class="stat-top-row">
+                            <div class="stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                            </div>
+                            <span class="stat-arrow">→</span>
+                        </div>
+                        <div class="stat-value" id="expiring-count">0</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Expiring Soon</p>
+                            <p class="stat-sub">within 30 days</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-lowstock" onclick="document.querySelector('[data-target=page-inventory]').click()" style="cursor:pointer">
+                        <div class="stat-top-row">
+                            <div class="stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            </div>
+                            <span class="stat-arrow">→</span>
+                        </div>
+                        <div class="stat-value" id="low-stock-count">0</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Low Stock</p>
+                            <p class="stat-sub">quantity below 10</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-expiring60" onclick="document.querySelector('[data-target=page-inventory]').click()" style="cursor:pointer">
+                        <div class="stat-top-row">
+                            <div class="stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                            </div>
+                            <span class="stat-arrow">→</span>
+                        </div>
+                        <div class="stat-value" id="expiring60-count">0</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Expiring Soon</p>
+                            <p class="stat-sub">within 60 days</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-expiring90" onclick="document.querySelector('[data-target=page-inventory]').click()" style="cursor:pointer">
+                        <div class="stat-top-row">
+                            <div class="stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                            </div>
+                            <span class="stat-arrow">→</span>
+                        </div>
+                        <div class="stat-value" id="expiring90-count">0</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Expiring Soon</p>
+                            <p class="stat-sub">within 90 days</p>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Quick Actions -->
+                <div class="ov-quick-actions">
+                    <button class="ov-action-btn ov-action-primary" onclick="document.querySelector('[data-target=page-add]').click()">
+                        <div class="ov-action-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </div>
+                        <span>Add Medicine</span>
+                    </button>
+                    <button class="ov-action-btn" onclick="document.querySelector('[data-target=page-inventory]').click()">
+                        <div class="ov-action-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        </div>
+                        <span>View Inventory</span>
+                    </button>
+                    <button class="ov-action-btn" onclick="document.querySelector('[data-target=page-analytics]').click()">
+                        <div class="ov-action-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <span>Analytics</span>
+                    </button>
+                    <button class="ov-action-btn" onclick="document.querySelector('[data-target=page-ai]').click()">
+                        <div class="ov-action-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                        </div>
+                        <span>AI Lookup</span>
+                    </button>
+                    <button class="ov-action-btn" id="ov-export-btn">
+                        <div class="ov-action-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </div>
+                        <span>Export PDF</span>
+                    </button>
+                </div>
+
+                <!-- Bottom panels -->
+                <div class="ov-panels">
+                    <!-- Expiry Status -->
+                    <div class="ov-panel">
+                        <div class="ov-panel-header">
+                            <div class="ov-panel-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                                <h3>Expiry Status</h3>
+                            </div>
+                            <span class="ov-panel-badge" id="ov-expiry-count">0 items</span>
+                        </div>
+                        <div id="expiry-summary" class="expiry-summary">
+                            <div class="empty-panel-msg">No medicines added yet.</div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Health -->
+                    <div class="ov-panel">
+                        <div class="ov-panel-header">
+                            <div class="ov-panel-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+                                <h3>Stock Health</h3>
+                            </div>
+                        </div>
+                        <div class="ov-health-bars" id="ov-health-bars">
+                            <div class="ov-health-row">
+                                <div class="ov-health-label"><span class="ov-health-dot" style="background:#2ed573"></span>Safe</div>
+                                <div class="ov-health-track"><div class="ov-health-fill" id="hb-safe" style="background:#2ed573;width:0%"></div></div>
+                                <span class="ov-health-val" id="hv-safe">0</span>
+                            </div>
+                            <div class="ov-health-row">
+                                <div class="ov-health-label"><span class="ov-health-dot" style="background:#fbbf24"></span>90d</div>
+                                <div class="ov-health-track"><div class="ov-health-fill" id="hb-90" style="background:#fbbf24;width:0%"></div></div>
+                                <span class="ov-health-val" id="hv-90">0</span>
+                            </div>
+                            <div class="ov-health-row">
+                                <div class="ov-health-label"><span class="ov-health-dot" style="background:#fb8c00"></span>60d</div>
+                                <div class="ov-health-track"><div class="ov-health-fill" id="hb-60" style="background:#fb8c00;width:0%"></div></div>
+                                <span class="ov-health-val" id="hv-60">0</span>
+                            </div>
+                            <div class="ov-health-row">
+                                <div class="ov-health-label"><span class="ov-health-dot" style="background:#f5365c"></span>30d</div>
+                                <div class="ov-health-track"><div class="ov-health-fill" id="hb-30" style="background:#f5365c;width:0%"></div></div>
+                                <span class="ov-health-val" id="hv-30">0</span>
+                            </div>
+                            <div class="ov-health-row">
+                                <div class="ov-health-label"><span class="ov-health-dot" style="background:#7f1d1d"></span>Expired</div>
+                                <div class="ov-health-track"><div class="ov-health-fill" id="hb-exp" style="background:#7f1d1d;width:0%"></div></div>
+                                <span class="ov-health-val" id="hv-exp">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Tips -->
+                    <div class="ov-panel">
+                        <div class="ov-panel-header">
+                            <div class="ov-panel-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <h3>Quick Tips</h3>
+                            </div>
+                        </div>
+                        <div class="tips-list">
+                            <div class="tip-item"><div class="tip-dot tip-green"></div><p>Add medicines with image, batch &amp; expiry for complete records.</p></div>
+                            <div class="tip-item"><div class="tip-dot tip-red"></div><p>Medicines expiring in under 30 days are highlighted red automatically.</p></div>
+                            <div class="tip-item"><div class="tip-dot tip-yellow"></div><p>Items with quantity below 10 are flagged as low stock in orange.</p></div>
+                            <div class="tip-item"><div class="tip-dot tip-blue"></div><p>Use AI Lookup to get instant medicine info from the FDA database.</p></div>
+                        </div>
+                    </div>
+                </div>
+
             </section>
 
             <!-- INVENTORY -->
