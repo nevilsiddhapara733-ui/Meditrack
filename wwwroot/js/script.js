@@ -170,6 +170,13 @@ function showLoginPage() {
     dashboardPage.classList.add('hidden');
     profilePage.classList.add('hidden');
     loginPage.classList.remove('hidden');
+    // Restart entrance animations every time login page is shown
+    loginPage.classList.remove('anim-ready');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            loginPage.classList.add('anim-ready');
+        });
+    });
 }
 checkAuthState();
 
@@ -374,9 +381,9 @@ function renderMedicines(ft = '') {
     let e30 = 0, e60 = 0, e90 = 0, ls = 0;
     medicines.forEach(m => {
         const d = daysDiff(m.expiry);
-        if (d > 0 && d <= 30) e30++;
-        if (d > 0 && d <= 60) e60++;
-        if (d > 0 && d <= 90) e90++;
+        if (d > 0 && d <= 30)        e30++;
+        if (d > 30 && d <= 60)       e60++;   // exclusive: 31–60 only
+        if (d > 60 && d <= 90)       e90++;   // exclusive: 61–90 only
         if (m.qty < 10) ls++;
     });
     totalCountEl.textContent    = medicines.length;

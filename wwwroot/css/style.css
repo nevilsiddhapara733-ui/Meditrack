@@ -125,15 +125,25 @@ body {
     z-index: 0;
 }
 
-/* Login page entrance animations */
-.brand-hero        { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
-.hero-text         { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
-.hero-stats        { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.25s both; }
-.login-right       { animation: loginSlideIn 0.5s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
-.login-card-header { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.2s both; }
-.auth-tabs         { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.28s both; }
-#login-form-wrap   { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.34s both; }
-#register-form-wrap{ animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.34s both; }
+/* Login page — animations triggered by .anim-ready class added by JS */
+#login-page .brand-hero,
+#login-page .hero-text,
+#login-page .hero-stats,
+#login-page .login-right,
+#login-page .login-card-header,
+#login-page .auth-tabs,
+#login-page #login-form-wrap,
+#login-page #register-form-wrap {
+    opacity: 0;
+}
+#login-page.anim-ready .brand-hero        { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
+#login-page.anim-ready .hero-text         { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
+#login-page.anim-ready .hero-stats        { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.25s both; }
+#login-page.anim-ready .login-right       { animation: loginSlideIn 0.5s  cubic-bezier(0.22,1,0.36,1) 0.05s both; }
+#login-page.anim-ready .login-card-header { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.20s both; }
+#login-page.anim-ready .auth-tabs         { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.28s both; }
+#login-page.anim-ready #login-form-wrap   { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.34s both; }
+#login-page.anim-ready #register-form-wrap{ animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.34s both; }
 
 /* Float icons on hero */
 .login-float-icons {
@@ -1442,10 +1452,11 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
     flex-direction: row !important;
     align-items: center !important;
     flex-wrap: nowrap !important;
-    gap: 12px !important;
-    padding: 0 14px !important;
+    gap: 10px !important;
+    padding: 0 12px 0 14px !important;
     height: 80px !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+    min-width: 0 !important;
 }
 #inventory-list.list-view .med-category-tag { display: none !important; }
 #inventory-list.list-view .med-title {
@@ -1454,8 +1465,8 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    min-width: 100px !important;
-    max-width: 140px !important;
+    width: 130px !important;
+    min-width: 0 !important;
     flex-shrink: 0 !important;
     margin-bottom: 0 !important;
     line-height: 1.2 !important;
@@ -1465,8 +1476,8 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    min-width: 90px !important;
-    max-width: 150px !important;
+    width: 110px !important;
+    min-width: 0 !important;
     flex-shrink: 0 !important;
     margin-bottom: 0 !important;
 }
@@ -1479,27 +1490,32 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
     margin-bottom: 0 !important;
     flex-shrink: 0 !important;
 }
+#inventory-list.list-view .days-left-pill { display: none !important; }
 #inventory-list.list-view .card-actions {
     display: flex !important;
     flex-direction: row !important;
-    gap: 5px !important;
+    gap: 6px !important;
     margin-left: auto !important;
     flex-shrink: 0 !important;
     grid-template-columns: unset !important;
     align-items: center !important;
+    padding-right: 4px !important;
 }
 #inventory-list.list-view .edit-btn,
 #inventory-list.list-view .delete-btn {
     width: auto !important;
+    min-width: 68px !important;
     padding: 0 12px !important;
     height: 30px !important;
     white-space: nowrap !important;
     font-size: 0.76rem !important;
     flex: none !important;
     border-radius: 8px !important;
-    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
-#inventory-list.list-view .edit-btn:hover { transform: none !important; }
+#inventory-list.list-view .edit-btn:hover   { transform: none !important; }
 #inventory-list.list-view .delete-btn:hover { transform: none !important; }
 body.dark-mode #inventory-list.list-view .med-card { background: #0b1220 !important; border-color: #1a2840 !important; }
 
