@@ -125,6 +125,16 @@ body {
     z-index: 0;
 }
 
+/* Login page entrance animations */
+.brand-hero        { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
+.hero-text         { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
+.hero-stats        { animation: loginFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.25s both; }
+.login-right       { animation: loginSlideIn 0.5s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
+.login-card-header { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.2s both; }
+.auth-tabs         { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.28s both; }
+#login-form-wrap   { animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.34s both; }
+#register-form-wrap{ animation: loginFadeUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.34s both; }
+
 /* Float icons on hero */
 .login-float-icons {
     position: absolute;
@@ -579,14 +589,22 @@ body.dark-mode .form-control:focus { background: var(--surface); }
 
 .page-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 1.5px solid transparent;
     background:
         linear-gradient(var(--bg), var(--bg)) padding-box,
         linear-gradient(90deg, #1668f5, #00c9a7 40%, transparent) border-box;
+}
+.inv-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
 }
 .page-header h1 {
     font-family: 'Syne', sans-serif;
@@ -802,8 +820,60 @@ body.dark-mode .form-control:focus { background: var(--surface); }
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
+/* Search bar — full width row below toolbar */
+.inv-search-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    position: relative;
+}
+.inv-search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+.search-input {
+    width: 100%;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 38px;
+}
+body.dark-mode .search-input { background: var(--surface-2); border-color: var(--border); color: var(--text); }
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+#search-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Add Medicine button in toolbar */
+.btn-add-quick {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 10px;
+    height: 36px;
+    white-space: nowrap;
+}
+
 .inv-filter-row { display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:.75rem;align-items:center; }
 .category-filter-row { display:flex;flex-wrap:wrap;gap:.5rem;align-items:center; }
 .cat-filter-label, .sort-label { font-size:.78rem;font-weight:600;color:var(--text-muted); }
@@ -985,7 +1055,7 @@ body.dark-mode .med-image-wrap { background: #141e2c; }
 }
 .status-ok      { background: #11cdef; color: #fff; }
 .status-warn    { background: #f5365c; color: #fff; animation: badgePulse 2s ease-in-out infinite; }
-.status-expired { background: #f5365c; color: #fff; }
+.status-expired { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
 .status-warn60  { background: #fb8c00; color: #fff; }
 .status-warn90  { background: #fbbf24; color: #111; }
 
@@ -1304,27 +1374,35 @@ body.dark-mode #inventory-list.list-view .med-card { background: #0b1220 !import
 .info-card p { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.6; }
 
 /* ============================================================
-   EXPORT BUTTONS
+   EXPORT BUTTONS — uniform style, invoice = same as others
    ============================================================ */
 
-.export-btn-group { display: flex; gap: 0.5rem; }
+.export-btn-group { display: flex; gap: 0.5rem; align-items: center; }
 .btn-export {
-    padding: .55rem 1rem;
-    background: transparent;
+    padding: .52rem .95rem;
+    background: var(--surface);
     border: 1.5px solid var(--border);
     color: var(--text-secondary);
-    border-radius: var(--radius);
+    border-radius: 10px;
     font-size: .82rem;
     font-weight: 600;
     font-family: 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
-    display: flex; align-items: center; gap: .4rem;
-    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+    height: 36px;
 }
-.btn-export:hover { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
-.btn-export-csv:hover { background: rgba(20,184,166,.1); border-color: #0d9488; color: #0d9488; }
-.btn-export-invoice:hover { background: rgba(99,102,241,.1); border-color: #6366f1; color: #6366f1; }
-.btn-export-green:hover { background: var(--success-light); border-color: var(--success); color: #15803d; }
+.btn-export:hover {
+    background: var(--surface-2);
+    border-color: var(--text-muted);
+    color: var(--text);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+.btn-export svg { flex-shrink: 0; }
 
 /* ============================================================
    ANALYTICS
@@ -1730,6 +1808,14 @@ body.dark-mode .invoice-modal-footer { background: var(--surface); border-color:
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes loginFadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes loginSlideIn {
+    from { opacity: 0; transform: translateX(32px); }
+    to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes pageEnter {
     from { opacity: 0; transform: translateY(10px); }
