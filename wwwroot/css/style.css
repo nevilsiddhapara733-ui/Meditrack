@@ -111,19 +111,7 @@ body {
     z-index: 0;
     pointer-events: none;
 }
-/* Subtle grid pattern */
-.login-left::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    opacity: 0.6;
-    z-index: 0;
-}
+.login-left::after { display: none; }
 
 /* Login page — animations triggered by .anim-ready class added by JS */
 #login-page .brand-hero,
@@ -685,12 +673,13 @@ body.dark-mode .form-control:focus { background: var(--surface); }
     color: var(--text-secondary);
 }
 .ov-clock {
-    font-family: 'Syne', monospace;
-    font-size: 1.1rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
     font-variant-numeric: tabular-nums;
+    line-height: 1;
 }
 
 /* Stats Grid */
