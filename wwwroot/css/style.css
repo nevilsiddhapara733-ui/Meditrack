@@ -1628,7 +1628,18 @@ body.dark-mode .chart-card { border-top-color: #4d94ff; }
 .chart-card-header p { font-size: 0.8rem; color: var(--text-muted); }
 .chart-wrap { position: relative; height: 260px; }
 .chart-wrap-sm { height: 220px; }
-.chart-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; color: var(--text-muted); background: var(--surface-2); border-radius: var(--radius); }
+.chart-empty {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    z-index: 2;
+}
 
 /* ============================================================
    AI LOOKUP

@@ -602,9 +602,27 @@
             <section id="page-analytics" class="page-section">
                 <div class="page-header"><div><h1>Analytics</h1><p class="page-subtitle">Visual breakdown of your inventory</p></div></div>
                 <div class="analytics-grid">
-                    <div class="chart-card chart-card-wide"><div class="chart-card-header"><h3>Stock Levels</h3><p>Quantity per medicine</p></div><div class="chart-wrap"><canvas id="chart-stock"></canvas><div class="chart-empty" id="chart-stock-empty">Add medicines to see stock chart</div></div></div>
-                    <div class="chart-card"><div class="chart-card-header"><h3>Expiry Status</h3><p>Valid vs expiring soon</p></div><div class="chart-wrap chart-wrap-sm"><canvas id="chart-expiry"></canvas><div class="chart-empty" id="chart-expiry-empty">Add medicines to see expiry chart</div></div></div>
-                    <div class="chart-card"><div class="chart-card-header"><h3>Stock Health</h3><p>Normal vs low stock</p></div><div class="chart-wrap chart-wrap-sm"><canvas id="chart-stock-health"></canvas><div class="chart-empty" id="chart-health-empty">Add medicines to see health chart</div></div></div>
+                    <div class="chart-card chart-card-wide">
+                        <div class="chart-card-header"><h3>Stock Levels</h3><p>Quantity per medicine (all items)</p></div>
+                        <div class="chart-wrap">
+                            <canvas id="chart-stock"></canvas>
+                            <div class="chart-empty" id="chart-stock-empty" style="display:flex">Add medicines to see stock chart</div>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-header"><h3>Expiry Status</h3><p>Safe vs expiring vs expired</p></div>
+                        <div class="chart-wrap chart-wrap-sm">
+                            <canvas id="chart-expiry"></canvas>
+                            <div class="chart-empty" id="chart-expiry-empty" style="display:flex">Add medicines to see expiry chart</div>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-header"><h3>Stock Health</h3><p>Normal vs low stock</p></div>
+                        <div class="chart-wrap chart-wrap-sm">
+                            <canvas id="chart-stock-health"></canvas>
+                            <div class="chart-empty" id="chart-health-empty" style="display:flex">Add medicines to see health chart</div>
+                        </div>
+                    </div>
                 </div>
             </section>
 

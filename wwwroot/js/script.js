@@ -719,28 +719,122 @@ function fireExpiryNotifications() {
 let chartStock = null, chartExpiry = null, chartHealth = null;
 function renderCharts() {
     const has = medicines.length > 0;
-    ['chart-stock-empty','chart-expiry-empty','chart-health-empty'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', has); });
-    ['chart-stock','chart-expiry','chart-stock-health'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = has ? 'block' : 'none'; });
-    if (!has) return;
 
+    // Show/hide empty states — never hide the canvas itself
+    ['chart-stock-empty','chart-expiry-empty','chart-health-empty'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = has ? 'none' : 'flex';
+    });
+
+    if (!has) {
+        if (chartStock)  { chartStock.destroy();  chartStock  = null; }
+        if (chartExpiry) { chartExpiry.destroy(); chartExpiry = null; }
+        if (chartHealth) { chartHealth.destroy(); chartHealth = null; }
+        return;
+    }
+
+    // Stock levels bar chart — ALL medicines sorted by qty desc
     const sc = document.getElementById('chart-stock');
     if (sc) {
-        if (chartStock) chartStock.destroy();
-        const t = [...medicines].sort((a,b) => b.qty - a.qty).slice(0, 10);
-        chartStock = new Chart(sc, { type:'bar', data: { labels: t.map(m => m.name.length > 14 ? m.name.slice(0,14) + '…' : m.name), datasets: [{ label:'Quantity', data: t.map(m => m.qty), backgroundColor: t.map(m => m.qty < 10 ? 'rgba(251,140,0,0.85)' : 'rgba(22,104,245,0.8)'), borderRadius: 6, borderSkipped: false }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ grid:{ color:'rgba(0,0,0,0.05)' }, beginAtZero:true } } } });
+        if (chartStock) { chartStock.destroy(); chartStock = null; }
+        const sorted = [...medicines].sort((a,b) => b.qty - a.qty);
+        const labels = sorted.map(m => m.name.length > 16 ? m.name.slice(0,16) + '…' : m.name);
+        const data   = sorted.map(m => m.qty);
+        const colors = sorted.map(m => m.qty < 10 ? 'rgba(251,140,0,0.85)' : 'rgba(22,104,245,0.8)');
+        chartStock = new Chart(sc, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Quantity',
+                    data,
+                    backgroundColor: colors,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 600, easing: 'easeOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` Qty: ${ctx.raw}${ctx.raw < 10 ? ' ⚠ Low' : ''}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { maxRotation: 35, font: { size: 11 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
     }
+
+    // Expiry doughnut
     const ec = document.getElementById('chart-expiry');
     if (ec) {
-        if (chartExpiry) chartExpiry.destroy();
-        let exp = 0, sn = 0, v = 0;
-        medicines.forEach(m => { const d = daysDiff(m.expiry); if (d <= 0) exp++; else if (d <= 30) sn++; else v++; });
-        chartExpiry = new Chart(ec, { type:'doughnut', data: { labels:['Safe','Expiring Soon','Expired'], datasets:[{ data:[v,sn,exp], backgroundColor:['rgba(46,213,115,0.85)','rgba(251,140,0,0.85)','rgba(245,54,92,0.85)'], borderWidth:0, hoverOffset:6 }] }, options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{ position:'bottom' } } } });
+        if (chartExpiry) { chartExpiry.destroy(); chartExpiry = null; }
+        let safe = 0, warn = 0, exp = 0;
+        medicines.forEach(m => {
+            const d = daysDiff(m.expiry);
+            if (d <= 0) exp++; else if (d <= 30) warn++; else safe++;
+        });
+        chartExpiry = new Chart(ec, {
+            type: 'doughnut',
+            data: {
+                labels: ['Safe (>30d)', 'Expiring ≤30d', 'Expired'],
+                datasets: [{
+                    data: [safe, warn, exp],
+                    backgroundColor: ['rgba(46,213,115,0.85)', 'rgba(251,140,0,0.85)', 'rgba(245,54,92,0.85)'],
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 600 },
+                cutout: '65%',
+                plugins: { legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 } } } }
+            }
+        });
     }
+
+    // Stock health doughnut
     const hc = document.getElementById('chart-stock-health');
     if (hc) {
-        if (chartHealth) chartHealth.destroy();
-        const lw = medicines.filter(m => m.qty < 10).length;
-        chartHealth = new Chart(hc, { type:'doughnut', data: { labels:['Normal Stock','Low Stock'], datasets:[{ data:[medicines.length - lw, lw], backgroundColor:['rgba(22,104,245,0.85)','rgba(251,140,0,0.85)'], borderWidth:0, hoverOffset:6 }] }, options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{ position:'bottom' } } } });
+        if (chartHealth) { chartHealth.destroy(); chartHealth = null; }
+        const low = medicines.filter(m => m.qty < 10).length;
+        chartHealth = new Chart(hc, {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal Stock', 'Low Stock (<10)'],
+                datasets: [{
+                    data: [medicines.length - low, low],
+                    backgroundColor: ['rgba(22,104,245,0.85)', 'rgba(251,140,0,0.85)'],
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 600 },
+                cutout: '65%',
+                plugins: { legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 } } } }
+            }
+        });
     }
 }
 
