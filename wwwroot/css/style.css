@@ -154,15 +154,15 @@ body {
 }
 .float-icon {
     position: absolute;
-    opacity: 0.05;
+    opacity: 0.07;
     width: 48px; height: 48px;
 }
-.float-icon:nth-child(1) { top: 12%; left: 8%;  width: 36px; height: 36px; }
-.float-icon:nth-child(2) { top: 28%; right: 12%; width: 52px; height: 52px; }
-.float-icon:nth-child(3) { bottom: 30%; left: 15%; width: 44px; height: 44px; }
-.float-icon:nth-child(4) { top: 60%; right: 8%;  width: 32px; height: 32px; }
-.float-icon:nth-child(5) { bottom: 15%; right: 20%; width: 56px; height: 56px; }
-.float-icon:nth-child(6) { top: 45%; left: 5%;  width: 40px; height: 40px; }
+.float-icon:nth-child(1) { top: 12%; left: 8%;  width: 36px; height: 36px; animation: floatDrift 7s ease-in-out infinite; }
+.float-icon:nth-child(2) { top: 28%; right: 12%; width: 52px; height: 52px; animation: floatDrift 9s ease-in-out 1s infinite; }
+.float-icon:nth-child(3) { bottom: 30%; left: 15%; width: 44px; height: 44px; animation: floatDrift 8s ease-in-out 2s infinite; }
+.float-icon:nth-child(4) { top: 60%; right: 8%;  width: 32px; height: 32px; animation: floatDrift 6s ease-in-out 0.5s infinite; }
+.float-icon:nth-child(5) { bottom: 15%; right: 20%; width: 56px; height: 56px; animation: floatDrift 10s ease-in-out 1.5s infinite; }
+.float-icon:nth-child(6) { top: 45%; left: 5%;  width: 40px; height: 40px; animation: floatDrift 8.5s ease-in-out 3s infinite; }
 
 .brand-hero {
     display: flex;
@@ -219,14 +219,21 @@ body {
 .stat-num {
     display: block;
     font-family: 'Syne', sans-serif;
-    font-size: 2.2rem;
+    font-size: 1.4rem;
     font-weight: 800;
     background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    white-space: nowrap;
 }
-.stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.38); letter-spacing: 0.06em; text-transform: uppercase; }
+.hero-stat .stat-label {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.38);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
 .hero-stat-divider { width: 1px; height: 38px; background: rgba(255,255,255,0.12); }
 
 /* Right login panel */
@@ -678,11 +685,12 @@ body.dark-mode .form-control:focus { background: var(--surface); }
     color: var(--text-secondary);
 }
 .ov-clock {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.15rem;
+    font-family: 'Syne', monospace;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--text);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
 }
 
 /* Stats Grid */
@@ -1383,7 +1391,8 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
 .cat-antihistamine{ background: rgba(249,115,22,.13);  color: #ea580c; }
 .cat-other        { background: rgba(107,114,128,.12); color: #6b7280; }
 
-/* Empty state */
+/* list-actions: only visible in list view, sits as 3rd grid column */
+.list-actions { display: none; }
 .empty-state { grid-column: 1 / -1; text-align: center; padding: 5rem 2rem; color: var(--text-muted); }
 .empty-state svg { margin-bottom: 1rem; opacity: 0.3; }
 .empty-state h3 { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
@@ -1396,17 +1405,19 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
 #inventory-list.list-view {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 7px !important;
 }
 #inventory-list.list-view .med-card {
     display: grid !important;
-    grid-template-columns: 100px 1fr !important;
-    height: 80px !important;
-    min-height: 80px !important;
-    max-height: 80px !important;
-    border-radius: 14px !important;
+    grid-template-columns: 88px 1fr 140px !important;
+    grid-template-rows: 78px !important;
+    height: 78px !important;
+    min-height: 78px !important;
+    max-height: 78px !important;
+    border-radius: 13px !important;
     overflow: hidden !important;
     animation: listCardIn 0.32s cubic-bezier(0.22,1,0.36,1) both !important;
+    transform: none !important;
 }
 #inventory-list.list-view .med-card:nth-child(1)   { animation-delay: 0.03s !important; }
 #inventory-list.list-view .med-card:nth-child(2)   { animation-delay: 0.07s !important; }
@@ -1418,25 +1429,26 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
 #inventory-list.list-view .med-card:nth-child(8)   { animation-delay: 0.24s !important; }
 #inventory-list.list-view .med-card:nth-child(n+9) { animation-delay: 0.26s !important; }
 #inventory-list.list-view .med-card:hover {
-    transform: translateX(4px) !important;
-    box-shadow: 0 4px 20px rgba(22,104,245,0.12), 0 1px 4px rgba(0,0,0,0.06) !important;
-    border-color: rgba(22,104,245,0.22) !important;
+    transform: translateX(3px) !important;
+    box-shadow: 0 3px 16px rgba(22,104,245,0.10) !important;
+    border-color: rgba(22,104,245,0.20) !important;
 }
+
+/* Col 1: image */
 #inventory-list.list-view .med-image-wrap {
-    width: 100px !important;
-    height: 80px !important;
-    min-height: 80px !important;
-    max-height: 80px !important;
-    border-radius: 14px 0 0 14px !important;
+    width: 88px !important;
+    height: 78px !important;
+    min-height: 78px !important;
+    max-height: 78px !important;
+    border-radius: 13px 0 0 13px !important;
     overflow: hidden !important;
     position: relative !important;
     flex-shrink: 0 !important;
+    display: block !important;
 }
 #inventory-list.list-view .med-image {
-    width: 100px !important;
-    height: 80px !important;
-    min-height: 80px !important;
-    max-height: 80px !important;
+    width: 88px !important;
+    height: 78px !important;
     object-fit: cover !important;
     display: block !important;
 }
@@ -1444,18 +1456,18 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
 #inventory-list.list-view .med-status-badge {
     font-size: 0.58rem !important;
     padding: 2px 6px !important;
-    top: 6px !important;
-    left: 6px !important;
+    top: 5px !important; left: 5px !important;
 }
+
+/* Col 2: info */
 #inventory-list.list-view .med-details {
     display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    gap: 10px !important;
-    padding: 0 12px 0 14px !important;
-    height: 80px !important;
-    overflow: visible !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    padding: 0 14px !important;
+    height: 78px !important;
+    overflow: hidden !important;
     min-width: 0 !important;
 }
 #inventory-list.list-view .med-category-tag { display: none !important; }
@@ -1465,59 +1477,55 @@ body.dark-mode .delete-btn { border-color: #1c2a3e; color: #6a8aaa; }
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    width: 130px !important;
-    min-width: 0 !important;
-    flex-shrink: 0 !important;
     margin-bottom: 0 !important;
     line-height: 1.2 !important;
 }
 #inventory-list.list-view .med-batch {
-    font-size: 0.72rem !important;
+    font-size: 0.71rem !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    width: 110px !important;
-    min-width: 0 !important;
-    flex-shrink: 0 !important;
     margin-bottom: 0 !important;
 }
 #inventory-list.list-view .med-meta-row {
     display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
     flex-wrap: nowrap !important;
     gap: 5px !important;
     margin-bottom: 0 !important;
-    flex-shrink: 0 !important;
+    align-items: center !important;
 }
 #inventory-list.list-view .days-left-pill { display: none !important; }
-#inventory-list.list-view .card-actions {
+#inventory-list.list-view .card-actions   { display: none !important; }
+
+/* Col 3: buttons — always visible, never squished */
+#inventory-list.list-view .list-actions {
     display: flex !important;
-    flex-direction: row !important;
-    gap: 6px !important;
-    margin-left: auto !important;
-    flex-shrink: 0 !important;
-    grid-template-columns: unset !important;
-    align-items: center !important;
-    padding-right: 4px !important;
-}
-#inventory-list.list-view .edit-btn,
-#inventory-list.list-view .delete-btn {
-    width: auto !important;
-    min-width: 68px !important;
-    padding: 0 12px !important;
-    height: 30px !important;
-    white-space: nowrap !important;
-    font-size: 0.76rem !important;
-    flex: none !important;
-    border-radius: 8px !important;
-    display: flex !important;
-    align-items: center !important;
+    flex-direction: column !important;
     justify-content: center !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+    padding: 10px 12px !important;
+    border-left: 1px solid var(--border) !important;
+    background: var(--surface-2) !important;
+    flex-shrink: 0 !important;
 }
-#inventory-list.list-view .edit-btn:hover   { transform: none !important; }
-#inventory-list.list-view .delete-btn:hover { transform: none !important; }
+#inventory-list.list-view .list-actions .edit-btn,
+#inventory-list.list-view .list-actions .delete-btn {
+    width: 100% !important;
+    height: 28px !important;
+    padding: 0 8px !important;
+    font-size: 0.75rem !important;
+    border-radius: 7px !important;
+    white-space: nowrap !important;
+    justify-content: center !important;
+    flex: none !important;
+    transform: none !important;
+    transition: background 0.15s, border-color 0.15s, color 0.15s !important;
+}
+#inventory-list.list-view .list-actions .edit-btn:hover   { transform: none !important; }
+#inventory-list.list-view .list-actions .delete-btn:hover { transform: none !important; }
 body.dark-mode #inventory-list.list-view .med-card { background: #0b1220 !important; border-color: #1a2840 !important; }
+body.dark-mode #inventory-list.list-view .list-actions { background: #0d1628 !important; border-color: #1a2840 !important; }
 
 /* ============================================================
    ADD MEDICINE PAGE
@@ -2016,6 +2024,11 @@ body.dark-mode .invoice-modal-footer { background: var(--surface); border-color:
    KEYFRAMES — all in one place, no duplicates
    ============================================================ */
 
+@keyframes floatDrift {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33%       { transform: translateY(-12px) rotate(4deg); }
+    66%       { transform: translateY(-6px) rotate(-3deg); }
+}
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
